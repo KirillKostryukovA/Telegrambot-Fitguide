@@ -7,6 +7,8 @@ from aiogram.types import Message, CallbackQuery, LabeledPrice
 import app.keyboards as kb 
 import app.inline_keyboards as inl_kb
 
+import Database.requests.orm as rq_orm
+
 
 payment_router = Router()
 
@@ -62,7 +64,7 @@ async def one_month_payment_sub(Callback: CallbackQuery):
         payload="sub_1_month",
         provider_token=PROVIDER_TOKEN,
         currency="RUB",
-        prices=[LabeledPrice(label="1 месяц", amount=39900),],
+        prices=[LabeledPrice(label="1 месяц", amount=39900),], # amount всегда в копейках!!!!!
         start_parameter="sub_1"
     )
 
@@ -72,4 +74,15 @@ async def one_month_payment_sub(Callback: CallbackQuery):
 # Если пользоватлель успешно оплатит подписку
 @payment_router.callback_query(F.successful_payment)
 async def successful_payment(message: Message):
-    await message.answer("Оплата прошла успешно!")
+    await rq_orm.AsyncOrm.update_user_paym_sub(message.from_user.id)
+    await message.answer("""
+🎉 Оплата прошла успешно! Добро пожаловать в клуб!
+
+Твой доступ к премиум-контенту активирован. С этого момента твоё преображение — наш общий приоритет.
+
+🔥 Теперь тебе доступно:
+
+✅ Индивидуальная программа тренировок — твой личный план силы, созданный и курируемый профессиональным тренером.
+✅ Индивидуальный план питания — персональный рацион, который будет работать именно на твои цели.
+✅ Закрытый ТГ-канал с марафоном — твоё комьюнити для мотивации, поддержки и гонки за крутыми призами.
+""")
