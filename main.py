@@ -3,11 +3,13 @@ import logging
 import tracemalloc
 
 from config import dp, bot
+from Database.requests.core import AsyncCore
+
 from app.user_panel import user_router
 from app.survey import survey_router
 from app.training_program import program_training_router
+from app.payments import payment_router
 
-from Database.requests.core import AsyncCore
 
 
 tracemalloc.start() # Включает трассировку, отслеживающую распреление памяти в программе
@@ -17,6 +19,7 @@ async def main():
     dp.include_router(user_router)
     dp.include_router(survey_router)
     dp.include_router(program_training_router)
+    dp.include_router(payment_router)
     
     # Запуск бота
     await AsyncCore.create_db()

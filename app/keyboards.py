@@ -1,9 +1,11 @@
-from aiogram.types import KeyboardButton, ReplyKeyboardMarkup
+from aiogram.types import KeyboardButton, ReplyKeyboardMarkup, InlineKeyboardMarkup, InlineKeyboardButton
 
 main_menu_kb = ReplyKeyboardMarkup(keyboard=[
     [KeyboardButton(text="📊 Пройти опрос")],
+    [KeyboardButton(text="🎯 Индивидуальная программа тренировок")],
+    [KeyboardButton(text="🥗 План питания конкретно под тебя")],
     [KeyboardButton(text="💪 Готовые тренировки")],
-    [KeyboardButton(text="🥗 База знаний о питании")],
+    [KeyboardButton(text="📚 База знаний о питании")],
     [KeyboardButton(text="📈 Мой прогресс")],
     [KeyboardButton(text="❓ Помощь / FAQ")],
 ], resize_keyboard=True, one_time_keyboard=True)
@@ -40,4 +42,9 @@ additional_information = ReplyKeyboardMarkup(keyboard=[
 free_programs_kb = ReplyKeyboardMarkup(keyboard=[
     [KeyboardButton(text=("Да, хочу идеальную программу тренировок"))],
     [KeyboardButton(text=("Нет, в следующий раз"))],
+], resize_keyboard=True, one_time_keyboard=True)
+
+
+paid_subscription_kb = ReplyKeyboardMarkup(keyboard=[
+    [KeyboardButton(text="Приобрести подписку прямо сейчас")] 
 ], resize_keyboard=True, one_time_keyboard=True)
