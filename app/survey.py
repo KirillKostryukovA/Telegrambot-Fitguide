@@ -1,5 +1,5 @@
 from aiogram import F, Router
-from aiogram.types import Message
+from aiogram.types import Message, ReplyKeyboardRemove
 
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
@@ -92,7 +92,7 @@ async def survey_for_user6(message: Message, state: FSMContext):
 @survey_router.message(Survey_user.additional_information)
 async def survey_for_user7(message: Message, state: FSMContext):
     await state.update_data(additional_information=message.text)
-    await message.answer("Спасибо большое за прохождение опроса, исходя из Ваших данных мы отправим Вам подходящую программу тренировок!")
+    await message.answer("Спасибо большое за прохождение опроса, исходя из Ваших данных мы отправим Вам подходящую программу тренировок!", reply_markup=ReplyKeyboardRemove())
 
     data = await state.get_data() # Храним всю запрошенную информацию в виде словаря
     await rq_core.AsyncCore.insert_info_about_user(tg_id=message.from_user.id, data=data) # Возвращаем все данные в функцию в ORM
