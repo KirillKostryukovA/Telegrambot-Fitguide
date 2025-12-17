@@ -29,6 +29,7 @@ class User_info(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     tg_id: Mapped[int] = mapped_column(nullable=False)
     paid_subcreption: Mapped[bool] = mapped_column(default=False)
+    subscription_duration: Mapped[int] = mapped_column(Integer, nullable=True)
 
     data: Mapped[list["User_data"]] = relationship(back_populates="info", cascade="all, delete-orphan")
 

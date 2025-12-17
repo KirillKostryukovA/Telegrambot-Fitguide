@@ -11,7 +11,8 @@ from alembic import context
 sys.path.append(str(Path(__file__).resolve().parents[2]))
 
 from config import settings_db 
-from Database.database import Base
+import Database.models # это обязательно, ведь здесь хранятся все модели наши. Или наче мы будем менять пустой файл в миграциях
+from Database.models import Base
 
 
 # this is the Alembic Config object, which provides
