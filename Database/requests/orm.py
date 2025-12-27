@@ -50,7 +50,7 @@ class AsyncOrm():
             )
 
             result = await session.execute(sqrt)
-            row = result.scalars().all()
+            row = result.scalar_one_or_none()
 
             if row is None:
                 return False
