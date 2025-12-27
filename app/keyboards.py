@@ -48,3 +48,8 @@ free_programs_kb = ReplyKeyboardMarkup(keyboard=[
 paid_subscription_kb = ReplyKeyboardMarkup(keyboard=[
     [KeyboardButton(text="Приобрести подписку прямо сейчас")] 
 ], resize_keyboard=True, one_time_keyboard=True)
+
+
+update_data_survey_kb = ReplyKeyboardMarkup(keyboard=[
+    [KeyboardButton(text="Да, обновить данные")], [KeyboardButton(text="Нет, всё актуально")],
+], resize_keyboard=True, one_time_keyboard=True)

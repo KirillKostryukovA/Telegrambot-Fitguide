@@ -30,6 +30,7 @@ class User_info(Base):
     tg_id: Mapped[int] = mapped_column(nullable=False)
     paid_subcreption: Mapped[bool] = mapped_column(default=False)
     subscription_duration: Mapped[int] = mapped_column(Integer, nullable=True)
+    
 
     data: Mapped[list["User_data"]] = relationship(back_populates="info", cascade="all, delete-orphan")
 
@@ -42,7 +43,7 @@ class User_data(Base):
     __tablename__ = "user_datas"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    id_us_info: Mapped[int] = mapped_column(ForeignKey("user_infos.id"))
+    id_us_info: Mapped[int] = mapped_column(ForeignKey("user_infos.id"), unique=True)
     age: Mapped[int] = mapped_column(Integer)
     gender: Mapped[GenderPeople] = mapped_column(SqlEnum(GenderPeople, name="genderpeople"))
     activity: Mapped[ActivityPeople] = mapped_column(SqlEnum(ActivityPeople, name="activitypeople"))

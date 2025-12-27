@@ -1,7 +1,8 @@
-from sqlalchemy import select, insert, cast, func, Integer
+from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 
 from Database.database import async_session
-from Database.models import User_info, User_data
+from Database.models import User_info, User_data, GenderPeople, ActivityPeople
 
 
 class AsyncOrm():
@@ -35,4 +36,23 @@ class AsyncOrm():
             # Сообщаем бд, что у пользователя теперь платная подписка
             user.paid_subcreption = True
             await session.commit()
+            return True
+        
+    
+    # Проверяем, проходил ли пользователь ранее опрос
+    @staticmethod
+    async def verification_data_survey(tg_id: int):
+        async with async_session() as session:
+            sqrt = (
+                select(User_data)
+                .where(User_info.tg_id == tg_id)
+                .options(selectinload(User_data.info))
+            )
+
+            result = await session.execute(sqrt)
+            row = result.scalars().all()
+
+            if row is None:
+                return False
+            
             return True

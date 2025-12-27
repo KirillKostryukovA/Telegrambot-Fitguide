@@ -1,0 +1,75 @@
+hard_select:
+            # sqrt = select(
+            #     User_info.id,
+            #     cast(func.avg(User_info.tg_id), Integer).label("avg_tg_id")
+            # ).select_from(User_info).filter(User_info.tg_id == tg_id)
+
+    # Обновляем данные о пользователе после повторного прохождения опроса
+    @staticmethod
+    async def update_data_about_survey(tg_id: int, data: dict):
+        async with async_session() as session:
+            sqrt = (
+                select(User_data)
+                .join(User_info, User_data.id_us_info==User_info.id)
+                .where(User_info.tg_id==tg_id)
+                .options(selectinload(User_data.info))
+            )
+
+            result = await session.execute(sqrt)
+            row = result.scalars().all()
+
+            data = data.copy()
+
+            # Гендер
+            data['gender'] = GenderPeople.man if data['gender'] == "Мужской ♂️" else GenderPeople.woman
+
+            # Активность
+            activity_map ={
+                "Каждый день": ActivityPeople.very_hight,
+                "Более 3-х раз в неделю": ActivityPeople.hight,
+                "3 раза в неделю": ActivityPeople.middle,
+                "Вообще не занимаюсь": ActivityPeople.low,
+            }
+
+            data['activity'] = activity_map.get(data['activity'], ActivityPeople.low)
+            
+
+            # Время сна
+            sleep_time_map = {
+                "Более 10 часов": "10+",
+                "8-10 часов": "8-10",
+                "6-8 часов": "6-8",
+                "Менее 6 часов": "6-",
+            }
+
+            data['sleep_time'] = sleep_time_map.get(data['sleep_time'], None)
+
+
+            # Вредные привычки
+            bad_habbits_map = {
+                "Да, у меня есть вредная привычка/зависимость": True,
+                "Нет, у меня нет вредных привычек/зависимостей": False,
+            }
+
+            data['bad_habbits'] = bad_habbits_map.get(data['bad_habbits'], False)
+
+
+            # Доп. информация
+            additional_information_map = {
+                "У меня нет никаких ограничений/болезней/аллергий/т.д": None,
+            }
+
+            data['additional_information'] = additional_information_map.get(data['additional_information'], data['additional_information'])
+
+
+            # Обновляем данные 
+            for items in row:
+                items.id=items.id
+                items.age=data['age']
+                items.gender=data['gender']
+                items.activity=data["activity"]
+                items.sleep_time=data['sleep_time']
+                items.bad_habbits=data['bad_habbits']
+                items.additional_information=data['additional_information']
+
+            session.commit() # Сохраняем изменения

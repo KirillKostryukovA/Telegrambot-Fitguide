@@ -1,4 +1,4 @@
-from sqlalchemy import insert, select, cast, func, Integer
+from sqlalchemy import insert, select, update
 
 from Database.database import Base, async_engine, async_session
 from Database.models import User_data, User_info, GenderPeople, ActivityPeople
@@ -17,11 +17,6 @@ class AsyncCore():
     async def insert_info_about_user(tg_id: int, data: dict):
         async with async_session() as session:
             sqrt = select(User_info.id).where(User_info.tg_id == tg_id) # айди пользователя, котрый будет использоваться для связи между схемами в БД
-            # sqrt = select(
-            #     User_info.id,
-            #     cast(func.avg(User_info.tg_id), Integer).label("avg_tg_id")
-            # ).select_from(User_info).filter(User_info.tg_id == tg_id)
-
             result = await session.execute(sqrt)
             id_pars = result.scalar_one_or_none()
 
@@ -31,8 +26,19 @@ class AsyncCore():
                 session.add(new_user)
                 await session.flush()
                 id_pars = new_user.id
-                await session.commit()
-                
+                await session.flush() # Получаем User_data.id
+
+            # Ищем данные в User_data, чтобы в дальнейшем понять, обновлять нам данные или добавлять
+            stmt1 = (
+                select(User_data)
+                .where(User_data.id_us_info==id_pars)
+            )
+            stmt1_execute = await session.execute(stmt1)
+            stmt_data = stmt1_execute.scalars().all()
+            
+
+            # -----     Начало маппинга -----
+            
             
             data = data.copy() # Подготавливаем данные
 
@@ -40,45 +46,64 @@ class AsyncCore():
             data['gender'] = GenderPeople.man if data['gender'] == "Мужской ♂️" else GenderPeople.woman
 
             # Активность
-            if data['activity'] == "Каждый день":
-                data['activity'] = ActivityPeople.very_hight
-            elif data['activity'] == "3 раза в неделю":
-                data['activity'] = ActivityPeople.middle               
-            elif data['activity'] == "Более 3-х раз в неделю":
-                data['activity'] = ActivityPeople.hight
-            else:
-                data['activity'] = ActivityPeople.low
+            activity_map ={
+                "Каждый день": ActivityPeople.very_hight,
+                "Более 3-х раз в неделю": ActivityPeople.hight,
+                "3 раза в неделю": ActivityPeople.middle,
+                "Вообще не занимаюсь": ActivityPeople.low,
+            }
+
+            data['activity'] = activity_map.get(data['activity'], ActivityPeople.low)
             
+
             # Время сна
-            if data['sleep_time'] == "Более 10 часов":
-                data['sleep_time'] = "10+"
-            if data['sleep_time'] == "8-10 часов":
-                data['sleep_time'] = "8-10"
-            if data['sleep_time'] == "6-8 часов":
-                data['sleep_time'] = "6-8"
-            if data['sleep_time'] == "Менее 6 часов":
-                data['sleep_time'] = "6-"
+            sleep_time_map = {
+                "Более 10 часов": "10+",
+                "8-10 часов": "8-10",
+                "6-8 часов": "6-8",
+                "Менее 6 часов": "6-",
+            }
+
+            data['sleep_time'] = sleep_time_map.get(data['sleep_time'], None)
+
 
             # Вредные привычки
-            if data['bad_habbits'] == "Да, у меня есть вредная привычка/зависимость":
-                data['bad_habbits'] = True
-            else:
-                data['bad_habbits'] = False
+            bad_habbits_map = {
+                "Да, у меня есть вредная привычка/зависимость": True,
+                "Нет, у меня нет вредных привычек/зависимостей": False,
+            }
+
+            data['bad_habbits'] = bad_habbits_map.get(data['bad_habbits'], False)
+
 
             # Доп. информация
-            if data['additional_information'] == "У меня нет никаких ограничений/болезней/аллергий/т.д":
-                data['additional_information'] = None
+            additional_information_map = {
+                "У меня нет никаких ограничений/болезней/аллергий/т.д": None,
+            }
 
-            # Добавляем информацию о пользователе в таблицу БД
-            stmt = insert(User_data).values(
-                id_us_info=id_pars,
-                age=data['age'],
-                gender=data['gender'],
-                activity=data['activity'],
-                sleep_time=data['sleep_time'],
-                bad_habbits=data['bad_habbits'],
-                additional_information=data['additional_information']
-            )
+            data['additional_information'] = additional_information_map.get(data['additional_information'], data['additional_information'])
+
+
+            if not stmt_data:  
+                # Добавляем информацию о пользователе в таблицу БД, если нет данных в User_data
+                stmt = insert(User_data).values(
+                    id_us_info=id_pars,
+                    age=data['age'],
+                    gender=data['gender'],
+                    activity=data['activity'],
+                    sleep_time=data['sleep_time'],
+                    bad_habbits=data['bad_habbits'],
+                    additional_information=data['additional_information']
+                )
+            else:
+                stmt = update(User_data).where(User_data.id_us_info==id_pars).values(
+                    age=data['age'],
+                    gender=data['gender'],
+                    activity=data['activity'],
+                    sleep_time=data['sleep_time'],
+                    bad_habbits=data['bad_habbits'],
+                    additional_information=data['additional_information']
+                )
 
             await session.execute(stmt)
             await session.commit()
