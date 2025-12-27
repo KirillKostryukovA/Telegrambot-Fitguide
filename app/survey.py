@@ -127,5 +127,13 @@ async def dont_update_data_survey(message: Message, state: FSMContext):
 # Если пользователь хочет обновить данные с опросаs
 @survey_router.message(F.text == "Да, обновить данные")
 async def update_data_from_survey_start(message: Message, state: FSMContext):
+    verify_survey_time = await rq_orm.AsyncOrm.verification_timeblock_survey(tg_id=message.from_user.id)
+
+    if verify_survey_time == False:
+        await state.clear()
+        await message.answer("Извините, но на данный момент Вам не доступен опрос. Попробуйте в это же время завтра!")
+        await main_menu(message)
+        return 
+    
     await state.set_state(Survey_user.age)
     await message.answer("Введите Ваш возраст:")

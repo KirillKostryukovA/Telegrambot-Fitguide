@@ -20,18 +20,8 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     """Upgrade schema."""
-    # Добавляем в User_data в колонке id_us_info значение unique=True
-    with op.batch_alter_table("user_datas") as batch_op:
-        batch_op.create_unique_constraint(
-            "uq_user_data_id_us_info",
-            ['id_us_info']
-        )
-
+    pass
 
 def downgrade() -> None:
     """Downgrade schema."""
-    with op.batch_alter_table("user_datas") as batch_op:
-        batch_op.drop_constraint(
-            "uq_user_data_id_us_info",
-            type_="unique"
-        )
+    pass

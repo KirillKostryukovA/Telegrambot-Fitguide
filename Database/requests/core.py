@@ -1,8 +1,13 @@
+from datetime import *
+
 from sqlalchemy import insert, select, update
 
 from Database.database import Base, async_engine, async_session
 from Database.models import User_data, User_info, GenderPeople, ActivityPeople
 
+
+now = datetime.now(timezone.utc) 
+BLOCK_TIME = timedelta(hours=24) # Представляет разницу между двумя моментами времени
 
 class AsyncCore():
     # Создание БД
@@ -105,5 +110,11 @@ class AsyncCore():
                     additional_information=data['additional_information']
                 )
 
+            # Время, в течение которого пользователь не может проходить опрос                
+            stmt_timeblock_survey = update(User_info).where(User_info.id==id_pars).values(
+                survey_available_at=now + BLOCK_TIME # Допустим, время 16:51, + ещё 1 минута = 16:52 ==> Пока время не достигнет 16:52, пользователь не сможет пройти опрос
+            )
+
             await session.execute(stmt)
+            await session.execute(stmt_timeblock_survey)
             await session.commit()

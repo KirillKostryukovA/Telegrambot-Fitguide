@@ -1,9 +1,13 @@
+from datetime import *
+
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
 from Database.database import async_session
 from Database.models import User_info, User_data, GenderPeople, ActivityPeople
 
+
+now = datetime.now(timezone.utc) # Время сейчас
 
 class AsyncOrm():
     # Добавление tg_id пользователя в БД
@@ -53,6 +57,20 @@ class AsyncOrm():
             row = result.scalar_one_or_none()
 
             if row is None:
+                return False
+            
+            return True
+        
+        
+    # Проверяем, доступен ли опрос для пользователя
+    @staticmethod
+    async def verification_timeblock_survey(tg_id: int):
+        async with async_session() as session:
+            sqrt = await session.execute(select(User_info.survey_available_at).where(User_info.tg_id==tg_id))
+            result = sqrt.scalar_one_or_none()
+
+            # Если это время есть и если время в настоящий момент меньше того, что в таблице, то возвращаем False
+            if result is not None and now < result:
                 return False
             
             return True

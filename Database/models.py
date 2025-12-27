@@ -1,7 +1,7 @@
 import datetime 
 from enum import Enum
 
-from sqlalchemy import Integer, Enum as SqlEnum, text, ForeignKey, String
+from sqlalchemy import Integer, Enum as SqlEnum, text, ForeignKey, String, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from Database.database import Base
@@ -30,7 +30,7 @@ class User_info(Base):
     tg_id: Mapped[int] = mapped_column(nullable=False)
     paid_subcreption: Mapped[bool] = mapped_column(default=False)
     subscription_duration: Mapped[int] = mapped_column(Integer, nullable=True)
-    
+    survey_available_at: Mapped[datetime.datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     data: Mapped[list["User_data"]] = relationship(back_populates="info", cascade="all, delete-orphan")
 
