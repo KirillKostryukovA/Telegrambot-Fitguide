@@ -22,6 +22,7 @@ PROVIDER_TOKEN = os.getenv("PROVIDER_TOKEN")
 
 
 @payment_router.message(F.text == "🎯 Индивидуальная программа тренировок")
+@payment_router.message(F.text == "🥗 План питания конкретно под вас")  
 async def paid_subscription(message: Message):
     await message.answer("""
 🎯 Для получения персонализированной программы тренировок и полного доступа к функционалу необходима подписка
@@ -72,9 +73,11 @@ async def one_month_payment_sub(Callback: CallbackQuery):
 
 
 # Если пользоватлель успешно оплатит подписку
-@payment_router.callback_query(F.successful_payment)
+@payment_router.message(F.successful_payment)
 async def successful_payment(message: Message):
-    await rq_orm.AsyncOrm.update_user_paym_sub(message.from_user.id)
+    payload = message.successful_payment.invoice_payload
+    
+    await rq_orm.AsyncOrm.update_user_paym_sub(message.from_user.id, payload=payload)
     await message.answer("""
 🎉 Оплата прошла успешно! Добро пожаловать в клуб!
 

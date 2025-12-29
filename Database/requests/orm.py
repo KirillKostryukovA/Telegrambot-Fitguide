@@ -9,6 +9,15 @@ from Database.models import User_info, User_data, GenderPeople, ActivityPeople
 
 now = datetime.now(timezone.utc) # Время сейчас
 
+# Список для того, чтобы зафиксировать дату подписки пользователя 
+SUBSCRIPTION_TIME_MAP = {
+    "sub_1_month" : timedelta(days=30),
+    "sub_3_month" : timedelta(days=90),
+    "sub_6_month" : timedelta(days=180),
+    "sub_1_year" : timedelta(days=365),
+}
+
+
 class AsyncOrm():
     # Добавление tg_id пользователя в БД
     @staticmethod
@@ -19,14 +28,14 @@ class AsyncOrm():
             if not sqrt:
                 new_user = User_info(tg_id=tg_id)
                 session.add(new_user)
-                
+
                 await session.commit()
                 return new_user
             
 
     # Делаем нашему пользователю премиум подписку 
     @staticmethod
-    async def update_user_paym_sub(tg_id: int):
+    async def update_user_paym_sub(tg_id: int, payload: str):
         async with async_session() as session:
             user = await session.scalar(select(User_info).where(User_info.tg_id == tg_id))
 
@@ -36,11 +45,25 @@ class AsyncOrm():
                 
                 session.commit()
                 return new_user
-
+            
+            # Время, в которое пользователь приобретёт подписку
+            now = datetime.now(timezone.utc)
+            duration = SUBSCRIPTION_TIME_MAP.get(payload) # Определяем срок подписки
+            
+            # Если пользователь не купил подписку
+            if not duration:
+                raise ValueError("Подписка не куплена, произошла ошибка")
+            
+            # Если подписка уже есть
+            if user.subscription_duration and user.subscription_duration > now:
+                user.subscription_duration += timedelta(days=duration)
+            # Если нет подписки у пользователя
+            else:
+                user.subscription_duration = now + timedelta(days=duration)
+            
             # Сообщаем бд, что у пользователя теперь платная подписка
             user.paid_subcreption = True
             await session.commit()
-            return True
         
     
     # Проверяем, проходил ли пользователь ранее опрос
