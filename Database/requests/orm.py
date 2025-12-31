@@ -40,10 +40,10 @@ class AsyncOrm():
             user = await session.scalar(select(User_info).where(User_info.tg_id == tg_id))
 
             if not user:
-                new_user = session.add(tg_id=tg_id)
+                new_user = User_info(tg_id=tg_id)
                 session.add(new_user)
                 
-                session.commit()
+                await session.commit()
                 return new_user
             
             # Время, в которое пользователь приобретёт подписку
@@ -56,10 +56,10 @@ class AsyncOrm():
             
             # Если подписка уже есть
             if user.subscription_duration and user.subscription_duration > now:
-                user.subscription_duration += timedelta(days=duration)
+                user.subscription_duration += duration
             # Если нет подписки у пользователя
             else:
-                user.subscription_duration = now + timedelta(days=duration)
+                user.subscription_duration = now + duration
             
             # Сообщаем бд, что у пользователя теперь платная подписка
             user.paid_subcreption = True
@@ -94,6 +94,20 @@ class AsyncOrm():
 
             # Если это время есть и если время в настоящий момент меньше того, что в таблице, то возвращаем False
             if result is not None and now < result:
+                return False
+            
+            return True
+        
+    
+    # Проверяем, есть ли у пользователя подписка
+    @staticmethod
+    async def verification_sub(tg_id: int):
+        async with async_session() as session:
+            user = await session.execute(select(User_info.paid_subcreption).where(User_info.tg_id == tg_id))
+            result = user.scalar_one_or_none()
+
+            # Если подписки нет, то значит нет :_)
+            if result is False:
                 return False
             
             return True

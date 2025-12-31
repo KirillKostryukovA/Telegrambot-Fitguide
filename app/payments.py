@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 
 from aiogram import Router, F
-from aiogram.types import Message, CallbackQuery, LabeledPrice
+from aiogram.types import Message, CallbackQuery, LabeledPrice, PreCheckoutQuery
 
 import app.keyboards as kb 
 import app.inline_keyboards as inl_kb
@@ -56,10 +56,10 @@ async def purchasing_ps(message: Message):
 """, reply_markup=inl_kb.purchasing_ps_kb)
     
 
-# Если пользователь смог успешно приобрести подписку
-@payment_router.callback_query(F.data == "button_1")
-async def one_month_payment_sub(Callback: CallbackQuery):
-    await Callback.message.answer_invoice(
+# Подписка на 1 месяц
+@payment_router.callback_query(F.data == "sub_1_month")
+async def one_month_payment_sub(callback: CallbackQuery):
+    await callback.message.answer_invoice(
         title="Подписка на 1 месяц",
         description="Доступ ко всем функциям на 1 месяц",
         payload="sub_1_month",
@@ -69,7 +69,61 @@ async def one_month_payment_sub(Callback: CallbackQuery):
         start_parameter="sub_1"
     )
 
-    await Callback.answer()
+    await callback.answer() # ЭТО ОБЯЗАТЕЛЬНО ВСЕГДА!!!!! БЕЗ НЕГО CALLBACK_QUERY не будет работать
+
+
+# Подписка на 3 месяца
+@payment_router.callback_query(F.data == "sub_3_month")
+async def three_month_payment_sub(callback: CallbackQuery):
+    await callback.message.answer_invoice(
+        title="Подписка на 3 месяца",
+        description="Доступ ко всем функциям на 3 месяца",
+        payload="sub_3_month",
+        provider_token=PROVIDER_TOKEN,
+        currency="RUB",
+        prices=[LabeledPrice(label="3 месяца", amount=69900),],
+        start_parameter="sub_3"
+    )
+
+    await callback.answer()
+
+
+# Подписка на 6 месяцев
+@payment_router.callback_query(F.data == "sub_6_month")
+async def six_month_payment_sub(callback: CallbackQuery):
+    await callback.message.answer_invoice(
+        title="Подписка на 6 месяцев",
+        description="Доступ ко всем функциям на 6 месяцев",
+        payload="sub_6_month",
+        provider_token=PROVIDER_TOKEN,
+        currency="RUB",
+        prices=[LabeledPrice(label="6 месяцев", amount=99900),],
+        start_parameter="sub_6"
+    )
+
+    await callback.answer()
+
+
+# Подписка на год
+@payment_router.callback_query(F.data == "sub_1_year")
+async def one_year_payment_sub(callback: CallbackQuery):
+    await callback.message.answer_invoice(
+        title="Подписка на 1 год",
+        description="Доступ ко всем функциям на 1 год",
+        payload="sub_1_year",
+        currency="RUB",
+        provider_token=PROVIDER_TOKEN,
+        prices=[LabeledPrice(label="1 год", amount=170000),],
+        start_parameter="sub_1_year"
+    )
+
+    await callback.answer()
+
+
+# Функция, которая даёт подтверждение телеграмму об оплате подписки. Обрабатывает заказ (подписку)
+@payment_router.pre_checkout_query()
+async def pre_checkout(pre_checkout_query: PreCheckoutQuery):
+    await pre_checkout_query.answer(ok=True)
 
 
 # Если пользоватлель успешно оплатит подписку
@@ -89,3 +143,9 @@ async def successful_payment(message: Message):
 ✅ Индивидуальный план питания — персональный рацион, который будет работать именно на твои цели.
 ✅ Закрытый ТГ-канал с марафоном — твоё комьюнити для мотивации, поддержки и гонки за крутыми призами.
 """)
+    
+    
+# Если оплата не прошла    
+@payment_router.message(F.failed_payment)
+async def failed_payments(message: Message):
+    await message.answer("❌ Оплата не прошла. Пожалуйста, попробуйте еще раз.")
