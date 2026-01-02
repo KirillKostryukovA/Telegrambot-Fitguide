@@ -1,12 +1,28 @@
 import os
+import asyncio
+
 from dotenv import load_dotenv
+from aiohttp import ClientTimeout
 
 from aiogram import Router, F
 from aiogram.types import Message, FSInputFile
+from aiogram.exceptions import TelegramNetworkError
 
-import app.keyboards as kb
+from app.payments import paid_subscription
+from app.panels.user_panel import main_menu
+
+import app.keyboards.keyboards as kb
+
+import Database.requests.orm as rq_orm
+import Database.requests.core as rq_core
+
+from config import bot
+
 
 program_training_router = Router()
+
+load_dotenv()
+TRAINER_ID = int(os.getenv("TRAINER_ID"))
 
 
 # Бесплатная программа тренировок
@@ -41,3 +57,62 @@ async def post_free_program(message: Message):
     # Нужно отправлять файл в бинарном виде, т.к. Aiogram требует файл как BufferedReader
     file = FSInputFile(file_path)
     await message.reply_document(file)
+
+
+# Индивидуальная программа тренировок для пользователя, оплатившего подписку
+@program_training_router.message(F.text == "🎯 Индивидуальная программа тренировок")
+async def get_paid_training_program(message: Message):
+    try:
+        is_paid = await rq_orm.AsyncOrm.verification_sub(tg_id=message.from_user.id)
+        is_data_survey = await rq_orm.AsyncOrm.verification_data_survey(tg_id=message.from_user.id)
+
+        if is_paid is False:
+            return await paid_subscription(message)
+        elif is_data_survey is False:
+            await message.answer("Для того, чтобы мы могли отправить Вам индивидуальную программу тренировок, пройдите опрос")
+            return await main_menu(message)
+        
+
+        await message.answer("""
+    ✅ Отлично! Ваши данные с опроса отправлены нашему тренеру.
+
+    Он внимательно изучит ваши ответы и в ближайшие 24 часа подготовит вашу персональную программу тренировок. Вы получите её прямо здесь, в этом чате.
+
+    А пока предлагаем не терять время:
+
+    🔥 Переходите в наш закрытый Telegram-канал — там уже кипит жизнь! Вы можете:
+    • Познакомиться с участниками марафона
+    • Узнать полезные фитнес-лайфхаки
+    • Начать погружаться в атмосферу поддержки и мотивации
+
+    Перейти в закрытый ТГ-канал
+
+    Оставайтесь на связи! Если у вас срочный вопрос, вы всегда можете написать нам.
+    """, request_timeout=30)
+        
+        await send_message_trainer(message)
+    
+    except TelegramNetworkError as e:
+        print("Ошибка сети телеграма: {e}")
+    
+
+# Сообщение тренера для создания индивидуальной программы тренировок 
+async def send_message_trainer(message: Message):
+    information = await rq_orm.AsyncOrm.information_about_user(tg_id=message.from_user.id) # Запрашиваем данные пользователя в человекочитаемом виде
+
+    try:
+        await bot.send_message(chat_id=TRAINER_ID, text=f"""
+        🔔 НОВЫЙ ЗАКАЗ: Индивидуальная программа тренировок\n\n
+        👤 Клиент: {message.from_user.first_name}\n
+        📋 Исходные данные клиента:\n
+            Возраст: {information['age']}\n
+            Пол: {information['gender']}\n
+            Уровень активности: {information['activity']}\n
+            Режим сна (часов в сутки): {information['sleep_time']}\n
+            Привычки, требующие учета: {information['bad_habbits']}\n
+            Дополнительная информация и цели: {information['additional_information']}\n
+        """, request_timeout=30)
+        return True
+    
+    except TelegramNetworkError as e:
+        print(f"Ошибка сети: {e}")

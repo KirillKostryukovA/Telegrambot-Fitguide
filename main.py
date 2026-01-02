@@ -5,7 +5,7 @@ import tracemalloc
 from config import dp, bot
 from Database.requests.core import AsyncCore
 
-from app.user_panel import user_router
+from app.panels.user_panel import user_router
 from app.survey import survey_router
 from app.training_program import program_training_router
 from app.payments import payment_router

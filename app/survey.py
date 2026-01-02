@@ -4,9 +4,9 @@ from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 
-from app.user_panel import main_menu
+from app.panels.user_panel import main_menu
 
-import app.keyboards as kb
+import app.keyboards.keyboards as kb
 
 import Database.requests.orm as rq_orm
 import Database.requests.core as rq_core

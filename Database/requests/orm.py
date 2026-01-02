@@ -5,6 +5,7 @@ from sqlalchemy.orm import selectinload
 
 from Database.database import async_session
 from Database.models import User_info, User_data, GenderPeople, ActivityPeople
+from Database.mapping.user_data_map import user_data_to_human
 
 
 now = datetime.now(timezone.utc) # Время сейчас
@@ -111,3 +112,18 @@ class AsyncOrm():
                 return False
             
             return True
+        
+
+    # Информация о пользователе в человекочитаемом виде 
+    @staticmethod
+    async def information_about_user(tg_id: int) -> dict:
+        async with async_session() as session:
+            sqrt = await session.execute((
+            select(User_data)
+            .join(User_info)
+            .where(User_info.tg_id==tg_id)
+            .options(selectinload(User_data.info))
+            ))
+            user_dict = sqrt.scalar_one_or_none()
+
+            return user_data_to_human(user_dict) # Маппинг из DB в человекочитаемый вид данныхs

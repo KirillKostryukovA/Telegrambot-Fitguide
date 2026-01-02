@@ -5,7 +5,7 @@ from aiogram.filters.command import CommandStart
 import Database.requests.orm as rq_orm
 import Database.requests.core as rq_core
 
-import app.keyboards as kb
+import app.keyboards.keyboards as kb
 
 
 user_router = Router()
@@ -30,4 +30,4 @@ async def main_menu(message: Message):
 • ❓ Помощь / FAQ — как пользоваться ботом.
 
 🎯 Главное — начать. Первый шаг уже сделан!
-""", reply_markup=kb.main_menu_kb)
+""", reply_markup=kb.main_menu_kb, request_timeout=30)

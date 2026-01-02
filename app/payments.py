@@ -4,8 +4,8 @@ from dotenv import load_dotenv
 from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery, LabeledPrice, PreCheckoutQuery
 
-import app.keyboards as kb 
-import app.inline_keyboards as inl_kb
+import app.keyboards.keyboards as kb 
+import app.keyboards.inline_keyboards as inl_kb
 
 import Database.requests.orm as rq_orm
 
@@ -21,8 +21,6 @@ PROVIDER_TOKEN = os.getenv("PROVIDER_TOKEN")
 """     ----- Платная подписка для пользователя -----     """
 
 
-@payment_router.message(F.text == "🎯 Индивидуальная программа тренировок")
-@payment_router.message(F.text == "🥗 План питания конкретно под вас")  
 async def paid_subscription(message: Message):
     await message.answer("""
 🎯 Для получения персонализированной программы тренировок и полного доступа к функционалу необходима подписка
