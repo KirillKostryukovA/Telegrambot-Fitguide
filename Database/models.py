@@ -35,7 +35,8 @@ class User_info(Base):
     data: Mapped[list["User_data"]] = relationship(back_populates="info", cascade="all, delete-orphan")
 
     def __repr__(self):
-        return f"User_info id={self.id}, tg_id={self.tg_id}, paid_subscreption={self.paid_subcreption}"
+        return f"User_info id={self.id}, tg_id={self.tg_id}, paid_subscreption={self.paid_subcreption}, subscription_duration={self.subscription_duration}, \
+            survey_available_at={self.survey_available_at}"
 
 
 # Информация о спортивных характеристиках пользователя
@@ -45,6 +46,8 @@ class User_data(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     id_us_info: Mapped[int] = mapped_column(ForeignKey("user_infos.id"), unique=True)
     age: Mapped[int] = mapped_column(Integer)
+    hight: Mapped[int] = mapped_column(Integer)
+    weight: Mapped[int] = mapped_column(Integer)
     gender: Mapped[GenderPeople] = mapped_column(SqlEnum(GenderPeople, name="genderpeople"))
     activity: Mapped[ActivityPeople] = mapped_column(SqlEnum(ActivityPeople, name="activitypeople"))
     sleep_time: Mapped[str] = mapped_column(String(15))
@@ -56,6 +59,6 @@ class User_data(Base):
     info: Mapped["User_info"] = relationship(back_populates='data')
 
     def __repr__(self):
-        return f"<User_data id={self.id}, id_us_info={self.id_us_info}, age={self.age}, gender={self.gender}, activity={self.activity}, \
+        return f"<User_data id={self.id}, id_us_info={self.id_us_info}, hight={self.hight}, weight={self.weigh}, age={self.age}, gender={self.gender}, activity={self.activity}, \
             sleep_time={self.sleep_time}, bad_habbits={self.bad_habbits}, additional_information={self.additional_information}, \
                 created_at={self.created_at}, updated_at={self.updated_at}>"

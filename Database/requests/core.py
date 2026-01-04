@@ -9,6 +9,7 @@ from Database.models import User_data, User_info, GenderPeople, ActivityPeople
 now = datetime.now(timezone.utc) 
 BLOCK_TIME = timedelta(hours=24) # Представляет разницу между двумя моментами времени
 
+
 class AsyncCore():
     # Создание БД
     @staticmethod
@@ -94,6 +95,8 @@ class AsyncCore():
                 stmt = insert(User_data).values(
                     id_us_info=id_pars,
                     age=data['age'],
+                    hight=data['hight'],
+                    weight=data['weight'],
                     gender=data['gender'],
                     activity=data['activity'],
                     sleep_time=data['sleep_time'],
@@ -103,6 +106,8 @@ class AsyncCore():
             else:
                 stmt = update(User_data).where(User_data.id_us_info==id_pars).values(
                     age=data['age'],
+                    hight=data['hight'],
+                    weight=data['weight'],
                     gender=data['gender'],
                     activity=data['activity'],
                     sleep_time=data['sleep_time'],

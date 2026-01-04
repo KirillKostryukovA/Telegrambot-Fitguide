@@ -26,6 +26,8 @@ SLEEP_TIME_REVERSE_MAP = {
 def user_data_to_human(user_data: dict) -> dict:
     return {
         "age": user_data.age,
+        "hight": user_data.hight,
+        "weight": user_data.weight,
         "gender": GENDER_REVERSE_MAP.get(user_data.gender, 'не указано'),
         "activity": ACTIVITY_REVERSE_MAP.get(user_data.activity, "не указано"),
         "sleep_time": SLEEP_TIME_REVERSE_MAP.get(user_data.sleep_time, "не указано"),

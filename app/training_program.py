@@ -1,8 +1,5 @@
 import os
-import asyncio
-
 from dotenv import load_dotenv
-from aiohttp import ClientTimeout
 
 from aiogram import Router, F
 from aiogram.types import Message, FSInputFile
@@ -61,6 +58,7 @@ async def post_free_program(message: Message):
 
 # Индивидуальная программа тренировок для пользователя, оплатившего подписку
 @program_training_router.message(F.text == "🎯 Индивидуальная программа тренировок")
+@program_training_router.message(F.text == "Да, хочу идеальную программу тренировок")
 async def get_paid_training_program(message: Message):
     try:
         is_paid = await rq_orm.AsyncOrm.verification_sub(tg_id=message.from_user.id)
@@ -106,6 +104,8 @@ async def send_message_trainer(message: Message):
         👤 Клиент: {message.from_user.first_name}\n
         📋 Исходные данные клиента:\n
             Возраст: {information['age']}\n
+            Рост: {information['hight']}\n
+            Вес: {information['weight']}\n
             Пол: {information['gender']}\n
             Уровень активности: {information['activity']}\n
             Режим сна (часов в сутки): {information['sleep_time']}\n

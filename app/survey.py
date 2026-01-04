@@ -17,6 +17,8 @@ survey_router = Router()
 # Машина состояния - опрос
 class Survey_user(StatesGroup):
     age = State()
+    hight = State()
+    weight = State()
     gender = State()
     activity = State()
     sleep_time = State()
@@ -44,21 +46,49 @@ async def survey_for_user1(message: Message, state: FSMContext):
 """)
     await message.answer("Введите Ваш возраст:")
 
-# Гендр
+
+# Рост пользователя
 @survey_router.message(Survey_user.age)
 async def survey_for_user2(message: Message, state: FSMContext):
     if not message.text.isdigit():
         await message.answer("Введите возраст числом!")
+        return 
+    
+    await state.update_data(age=int(message.text))
+    await state.set_state(Survey_user.hight)
+
+    await message.answer("Введите Ваш рост числом:")
+
+
+# Вес пользователя
+@survey_router.message(Survey_user.hight)
+async def survey_for_user3(message: Message, state: FSMContext):
+    if not message.text.isdigit():
+        await message.answer("Введите рост числом!")
+        return 
+    
+    await state.update_data(hight=int(message.text))
+    await state.set_state(Survey_user.weight)
+
+    await message.answer("Введите Ваш вес числом:")
+
+
+# Гендр
+@survey_router.message(Survey_user.weight)
+async def survey_for_user4(message: Message, state: FSMContext):
+    if not message.text.isdigit():
+        await message.answer("Введите вес числом!")
         return
     
-    await state.update_data(age=int(message.text)) # Сохраняем информацию о возрасте
+    await state.update_data(weight=int(message.text)) # Сохраняем информацию о возрасте
     await state.set_state(Survey_user.gender)
 
     await message.answer("Отлично, теперь выберите свой пол:",reply_markup=kb.gender_kb)
 
+
 # Активность
 @survey_router.message(Survey_user.gender)
-async def survey_for_user3(message: Message, state: FSMContext):
+async def survey_for_user5(message: Message, state: FSMContext):
     await state.update_data(gender=message.text)
     await state.set_state(Survey_user.activity)
 
@@ -67,7 +97,7 @@ async def survey_for_user3(message: Message, state: FSMContext):
 
 # Сон
 @survey_router.message(Survey_user.activity)
-async def survey_for_user4(message: Message, state: FSMContext):
+async def survey_for_user6(message: Message, state: FSMContext):
     await state.update_data(activity=message.text)
     await state.set_state(Survey_user.sleep_time)
 
@@ -76,7 +106,7 @@ async def survey_for_user4(message: Message, state: FSMContext):
 
 # Плохие привычки
 @survey_router.message(Survey_user.sleep_time)
-async def survey_for_user5(message: Message, state: FSMContext):
+async def survey_for_user7(message: Message, state: FSMContext):
     await state.update_data(sleep_time=message.text)
     await state.set_state(Survey_user.bad_habbits)
 
@@ -85,7 +115,7 @@ async def survey_for_user5(message: Message, state: FSMContext):
 
 # Дополнительные медицинские данные
 @survey_router.message(Survey_user.bad_habbits)
-async def survey_for_user6(message: Message, state: FSMContext):
+async def survey_for_user8(message: Message, state: FSMContext):
     await state.update_data(bad_habbits=message.text)
     await state.set_state(Survey_user.additional_information)
 
@@ -100,7 +130,7 @@ async def survey_for_user6(message: Message, state: FSMContext):
 
 # Сохраняем запрошенные данные в виде словаря для отправки в БД
 @survey_router.message(Survey_user.additional_information)
-async def survey_for_user7(message: Message, state: FSMContext):
+async def survey_for_user9(message: Message, state: FSMContext):
     await state.update_data(additional_information=message.text)
     await message.answer("Спасибо большое за прохождение опроса, исходя из Ваших данных мы отправим Вам подходящую программу тренировок!", reply_markup=ReplyKeyboardRemove())
 
@@ -124,7 +154,7 @@ async def dont_update_data_survey(message: Message, state: FSMContext):
     return 
 
 
-# Если пользователь хочет обновить данные с опросаs
+# Если пользователь хочет обновить данные с опроса
 @survey_router.message(F.text == "Да, обновить данные")
 async def update_data_from_survey_start(message: Message, state: FSMContext):
     verify_survey_time = await rq_orm.AsyncOrm.verification_timeblock_survey(tg_id=message.from_user.id)
