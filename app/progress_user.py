@@ -3,9 +3,13 @@ from aiogram.types import Message
 
 import Database.requests.orm as rq_orm
 
+import app.keyboards.inline_keyboards as inl_kb
+
+
 user_progress_router = Router()
 
 
+# Показываем профиль пользователя ... пользователю
 @user_progress_router.message(F.text == "📈 Мой прогресс")
 async def user_profile(message: Message):
     information = await rq_orm.AsyncOrm.information_about_user(tg_id=message.from_user.id)
@@ -26,4 +30,4 @@ async def user_profile(message: Message):
 • Сон (в сутки): {information['sleep_time']} часов
 • Привычки, требующие внимания: {information['bad_habbits']}
 • Доп. информация и цели: {information['additional_information']}
-""")
+""", reply_markup=inl_kb.user_profile_kb, request_timeout=30)

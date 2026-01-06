@@ -7,7 +7,7 @@ from Database.models import User_data, User_info, GenderPeople, ActivityPeople
 
 
 now = datetime.now(timezone.utc) 
-BLOCK_TIME = timedelta(hours=24) # Представляет разницу между двумя моментами времени
+BLOCK_TIME = timedelta(minutes=1) # Представляет разницу между двумя моментами времени
 
 
 class AsyncCore():
@@ -47,40 +47,6 @@ class AsyncCore():
             
             
             data = data.copy() # Подготавливаем данные
-
-            # Гендер
-            data['gender'] = GenderPeople.man if data['gender'] == "Мужской ♂️" else GenderPeople.woman
-
-            # Активность
-            activity_map ={
-                "Каждый день": ActivityPeople.very_hight,
-                "Более 3-х раз в неделю": ActivityPeople.hight,
-                "3 раза в неделю": ActivityPeople.middle,
-                "Вообще не занимаюсь": ActivityPeople.low,
-            }
-
-            data['activity'] = activity_map.get(data['activity'], ActivityPeople.low)
-            
-
-            # Время сна
-            sleep_time_map = {
-                "Более 10 часов": "10+",
-                "8-10 часов": "8-10",
-                "6-8 часов": "6-8",
-                "Менее 6 часов": "6-",
-            }
-
-            data['sleep_time'] = sleep_time_map.get(data['sleep_time'], None)
-
-
-            # Вредные привычки
-            bad_habbits_map = {
-                "Да, у меня есть вредная привычка/зависимость": True,
-                "Нет, у меня нет вредных привычек/зависимостей": False,
-            }
-
-            data['bad_habbits'] = bad_habbits_map.get(data['bad_habbits'], False)
-
 
             # Доп. информация
             additional_information_map = {

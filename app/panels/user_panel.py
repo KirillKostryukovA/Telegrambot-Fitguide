@@ -1,16 +1,17 @@
-from aiogram import Router
-from aiogram.types import Message
+from aiogram import Router, F
+from aiogram.types import Message, CallbackQuery
 from aiogram.filters.command import CommandStart
 
 import Database.requests.orm as rq_orm
 import Database.requests.core as rq_core
 
-import app.keyboards.keyboards as kb
+# import app.keyboards.keyboards as kb
+import app.keyboards.inline_keyboards as inl_kb
 
 
 user_router = Router()
 
-# Главное меню
+# Главное меню (вызов через Start)
 @user_router.message(CommandStart())
 async def main_menu(message: Message):
     await rq_orm.AsyncOrm.get_user_tg_id(message.from_user.id) # Функция, чтобы получить tg_id пользователя
@@ -29,4 +30,28 @@ async def main_menu(message: Message):
 • ❓ Помощь / FAQ — как пользоваться ботом.
 
 🎯 Главное — начать. Первый шаг уже сделан!
-""", reply_markup=kb.main_menu_kb, request_timeout=30)
+""", reply_markup=await inl_kb.main_menu_kb(), request_timeout=30)
+    
+
+# Главное меню (вызов через Start)
+@user_router.callback_query(F.data == "back_main_menu")
+async def main_menu(callback: CallbackQuery):
+    await callback.answer()
+    
+    await rq_orm.AsyncOrm.get_user_tg_id(callback.from_user.id) # Функция, чтобы получить tg_id пользователя
+    await callback.message.edit_text(f"""
+🏋️‍♂️ Привет, {callback.from_user.first_name}!
+
+Я — твой личный тренер и наставник по питанию прямо здесь, в Telegram! Моя цель — помочь тебе кардинально преобразить свою форму, силу и выносливость.
+
+Выбери, с чего начнем свой путь:
+
+• 📊 Пройти опрос — чтобы я создал персональную программу под твои цели.
+• 🎯 Индивидуальная программа тренировок — готовая программа, рассчитанная именно на тебя (цели, уровень, инвентарь).
+• 🥗 План питания конкретно под тебя — персонализированный рацион с учетом твоих параметров и предпочтений.
+• 💪 Готовые тренировки — планы на силу, массу, рельеф или выносливость.
+• 📈 Мой прогресс — отслеживать результаты и достижения.
+• ❓ Помощь / FAQ — как пользоваться ботом.
+
+🎯 Главное — начать. Первый шаг уже сделан!
+""", reply_markup=await inl_kb.main_menu_kb())

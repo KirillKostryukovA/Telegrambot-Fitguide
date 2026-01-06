@@ -2,13 +2,13 @@ import os
 from dotenv import load_dotenv
 
 from aiogram import Router, F
-from aiogram.types import Message, FSInputFile
+from aiogram.types import Message, FSInputFile, CallbackQuery
 from aiogram.exceptions import TelegramNetworkError
 
 from app.payments import paid_subscription
 from app.panels.user_panel import main_menu
 
-import app.keyboards.keyboards as kb
+import app.keyboards.inline_keyboards as inl_kb
 
 import Database.requests.orm as rq_orm
 import Database.requests.core as rq_core
@@ -31,12 +31,12 @@ async def free_program_training(message: Message):
 Однако! Если вы хотите получить программу, которая будет учитывать ваш пол, возраст, доступный инвентарь, цели и состояние здоровья — пройдите быстрый опрос. Мы literally подстроим её под вас, и вам не придётся гадать, что делать.
 
 Потратить 2 минуты сейчас, чтобы получить идеальную программу?
-""", reply_markup=kb.free_programs_kb)
+""", reply_markup=inl_kb.training_program_kb)
     
 
 # Отправляем пользователю файл с бесплатной программой тренировок
-@program_training_router.message(F.text == "Нет, в следующий раз")
-async def post_free_program(message: Message):
+@program_training_router.callback_query(F.data == "get_free_program_training")
+async def post_free_program(message: Message, callback: CallbackQuery):
     await message.answer("""
 Хорошо, держи файл с универсальной программой тренировок для всех! 🏋️‍♀️
 
@@ -54,6 +54,8 @@ async def post_free_program(message: Message):
     # Нужно отправлять файл в бинарном виде, т.к. Aiogram требует файл как BufferedReader
     file = FSInputFile(file_path)
     await message.reply_document(file)
+
+    await callback.answer() 
 
 
 # Индивидуальная программа тренировок для пользователя, оплатившего подписку
@@ -100,17 +102,19 @@ async def send_message_trainer(message: Message):
 
     try:
         await bot.send_message(chat_id=TRAINER_ID, text=f"""
-        🔔 НОВЫЙ ЗАКАЗ: Индивидуальная программа тренировок\n\n
-        👤 Клиент: {message.from_user.first_name}\n
-        📋 Исходные данные клиента:\n
-            Возраст: {information['age']}\n
-            Рост: {information['hight']}\n
-            Вес: {information['weight']}\n
-            Пол: {information['gender']}\n
-            Уровень активности: {information['activity']}\n
-            Режим сна (часов в сутки): {information['sleep_time']}\n
-            Привычки, требующие учета: {information['bad_habbits']}\n
-            Дополнительная информация и цели: {information['additional_information']}\n
+        🔔 НОВЫЙ ЗАКАЗ НА ИНДИВИДУАЛЬНУЮ ПРОГРАММУ ТРЕНИРОВОК
+━━━━━━━━━━━━━━
+👤 Клиент: {message.from_user.first_name}
+📋 Анкета клиента:
+• 🎂 Возраст: {information['age']}
+• 📏 Рост: {information['hight']}
+• ⚖️ Вес: {information['weight']}
+• 🚻 Пол: {information['gender']}
+• 🔥 Уровень активности: {information['activity']}
+• 😴 Сон (часов в сутки): {information['sleep_time']}
+• 🚬 Привычки, требующие учёта: {information['bad_habbits']}
+🎯 Цели и дополнительная информация:
+{information['additional_information']}
         """, request_timeout=30)
         return True
     
