@@ -4,7 +4,7 @@ import asyncio
 from dotenv import load_dotenv
 
 from aiogram import Router, F
-from aiogram.types import Message, FSInputFile
+from aiogram.types import Message, CallbackQuery
 from aiogram.exceptions import TelegramNetworkError, TelegramAPIError
 
 from app.payments import paid_subscription
@@ -22,21 +22,23 @@ TRAINER_ID = int(os.getenv("TRAINER_ID"))
 
 
 # Индивидуальный план питания для пользователя, оплатившего подписку
-@meal_plan_router.message(F.text == "Индивидуальный план питания")
-async def personal_meal_plan(message: Message):
-    is_paid = await rq_orm.AsyncOrm.verification_sub(tg_id=message.from_user.id)
-    is_data_survey = await rq_orm.AsyncOrm.verification_data_survey(tg_id=message.from_user.id)
+@meal_plan_router.callback_query(F.data == "meal_plan")
+async def personal_meal_plan(callback: CallbackQuery):
+    await callback.answer()
 
+    is_paid = await rq_orm.AsyncOrm.verification_sub(tg_id=callback.from_user.id)
+    is_data_survey = await rq_orm.AsyncOrm.verification_data_survey(tg_id=callback.from_user.id)
+    
     # Если у пользователя нет подписки
     if is_paid is False:
-        return await paid_subscription(message)
+        return await paid_subscription(callback)
     # Если пользователь не проходил опрос
     elif is_data_survey is False:
-        await message.answer("Для того, чтобы получить личный план питания Вам необходимо пройти опрос, на основании которого мы сделаем Вам подходящиый план питания!")
-        return await main_menu(message)
+        await callback.message.edit_text("Для того, чтобы получить личный план питания Вам необходимо пройти опрос, на основании которого мы сделаем Вам подходящиый план питания!")
+        return await main_menu(callback)
 
     try:
-        await message.answer("""
+        await callback.message.edit_text("""
 ✅ Отлично! Ваши данные с опроса отправлены нашему тренеру.
 
     Он внимательно изучит ваши ответы и в ближайшие 24 часа подготовит вашу персональный план питания. Вы получите её прямо здесь, в этом чате.
@@ -51,12 +53,16 @@ async def personal_meal_plan(message: Message):
     Перейти в закрытый ТГ-канал
 
     Оставайтесь на связи! Если у вас срочный вопрос, вы всегда можете написать нам.
-    """, request_timeout=30)
+    """)
 
-        await message_to_trainer_2(message)
+        await message_to_trainer_2(callback)
 
+    except Exception as e:
+        print(f"Произошла неопознанная ошибка: {e}")
     except TelegramNetworkError as e:
         print(f"Произошла ошибка сети: {e}")
+    except TelegramAPIError as e:
+        print(f"Произошла ошибка API Telegram: {e}")
 
 
 # Сообщение тренера для создания индивидуальной программы тренировок 
@@ -65,7 +71,7 @@ async def message_to_trainer_2(message: Message):
 
     try:
         await bot.send_message(chat_id=TRAINER_ID, text=f"""
-        🔔 НОВЫЙ ЗАКАЗ НА ИНДИВИДУАЛЬНУЮ ПРОГРАММУ ТРЕНИРОВОК
+        🔔 <b>НОВЫЙ ЗАКАЗ НА ИНДИВИДУАЛЬНЫЙ ПЛАН ПИТАНИЯ</b>
 ━━━━━━━━━━━━━━
 👤 Клиент: {message.from_user.first_name}
 📋 Анкета клиента:
@@ -78,8 +84,12 @@ async def message_to_trainer_2(message: Message):
 • 🚬 Привычки, требующие учёта: {information['bad_habbits']}
 🎯 Цели и дополнительная информация:
 {information['additional_information']}
-        """, request_timeout=30)
+        """, parse_mode="html")
         return True
     
+    except Exception as e:
+        print(f"Произошла неопознанная ошибка: {e}")
     except TelegramNetworkError as e:
-        print(f"Ошибка сети: {e}")
+        print(f"Произошла ошибка сети: {e}")
+    except TelegramAPIError as e:
+        print(f"Произошла ошибка API Telegram: {e}")

@@ -11,7 +11,6 @@ from app.panels.user_panel import main_menu
 import app.keyboards.inline_keyboards as inl_kb
 
 import Database.requests.orm as rq_orm
-import Database.requests.core as rq_core
 
 from config import bot
 
@@ -23,9 +22,9 @@ TRAINER_ID = int(os.getenv("TRAINER_ID"))
 
 
 # Бесплатная программа тренировок
-@program_training_router.message(F.text == "💪 Готовые тренировки")
-async def free_program_training(message: Message):
-    await message.answer("""
+@program_training_router.callback_query(F.data == "free_training_plan")
+async def free_program_training(callback: CallbackQuery):
+    await callback.message.edit_text("""
 Супер! Ваша бесплатная программа тренировок уже ждёт. Она универсальна, и вы сможете её настроить.
 
 Однако! Если вы хотите получить программу, которая будет учитывать ваш пол, возраст, доступный инвентарь, цели и состояние здоровья — пройдите быстрый опрос. Мы literally подстроим её под вас, и вам не придётся гадать, что делать.
@@ -36,8 +35,10 @@ async def free_program_training(message: Message):
 
 # Отправляем пользователю файл с бесплатной программой тренировок
 @program_training_router.callback_query(F.data == "get_free_program_training")
-async def post_free_program(message: Message, callback: CallbackQuery):
-    await message.answer("""
+async def post_free_program(callback: CallbackQuery):
+    await callback.answer()
+    
+    await callback.message.edit_text("""
 Хорошо, держи файл с универсальной программой тренировок для всех! 🏋️‍♀️
 
 В нём есть отличная база, с которой можно начать.
@@ -47,33 +48,39 @@ async def post_free_program(message: Message, callback: CallbackQuery):
 Удачи на тренировках! 
 """)
 
-    load_dotenv()
-    FREE_PROGRAM=os.getenv("FREE_PROGRAM")
-    file_path = FREE_PROGRAM
+    try:
+        load_dotenv()
+        FREE_PROGRAM=os.getenv("FREE_PROGRAM")
+        file_path = FREE_PROGRAM
 
-    # Нужно отправлять файл в бинарном виде, т.к. Aiogram требует файл как BufferedReader
-    file = FSInputFile(file_path)
-    await message.reply_document(file)
+        # Нужно отправлять файл в бинарном виде, т.к. Aiogram требует файл как BufferedReader
+        file = FSInputFile(file_path)
+        await callback.message.reply_document(file) 
 
-    await callback.answer() 
+    except Exception as e:
+        print(f"Произошла неопознанная ошибка: {e}")
+    except TelegramNetworkError as e:
+        print(f"Произошла ошибка сети Telegram: {e}")
 
 
 # Индивидуальная программа тренировок для пользователя, оплатившего подписку
-@program_training_router.message(F.text == "🎯 Индивидуальная программа тренировок")
-@program_training_router.message(F.text == "Да, хочу идеальную программу тренировок")
-async def get_paid_training_program(message: Message):
+@program_training_router.callback_query(F.data == "training_prog")
+@program_training_router.callback_query(F.data == "perfect_program_training")
+async def get_paid_training_program(callback: CallbackQuery):
     try:
-        is_paid = await rq_orm.AsyncOrm.verification_sub(tg_id=message.from_user.id)
-        is_data_survey = await rq_orm.AsyncOrm.verification_data_survey(tg_id=message.from_user.id)
+        await callback.answer()
+        
+        is_paid = await rq_orm.AsyncOrm.verification_sub(tg_id=callback.from_user.id)
+        is_data_survey = await rq_orm.AsyncOrm.verification_data_survey(tg_id=callback.from_user.id)
 
         if is_paid is False:
-            return await paid_subscription(message)
+            return await paid_subscription(callback)
         elif is_data_survey is False:
-            await message.answer("Для того, чтобы мы могли отправить Вам индивидуальную программу тренировок, пройдите опрос")
-            return await main_menu(message)
+            await callback.message.edit_text("Для того, чтобы мы могли отправить Вам индивидуальную программу тренировок, пройдите опрос")
+            return await main_menu(callback)
         
 
-        await message.answer("""
+        await callback.message.edit_text("""
     ✅ Отлично! Ваши данные с опроса отправлены нашему тренеру.
 
     Он внимательно изучит ваши ответы и в ближайшие 24 часа подготовит вашу персональную программу тренировок. Вы получите её прямо здесь, в этом чате.
@@ -88,12 +95,12 @@ async def get_paid_training_program(message: Message):
     Перейти в закрытый ТГ-канал
 
     Оставайтесь на связи! Если у вас срочный вопрос, вы всегда можете написать нам.
-    """, request_timeout=30)
+    """)
         
-        await send_message_trainer(message)
+        await send_message_trainer(callback)
     
     except TelegramNetworkError as e:
-        print("Ошибка сети телеграма: {e}")
+        print(f"Ошибка сети телеграма: {e}")
     
 
 # Сообщение тренера для создания индивидуальной программы тренировок 
@@ -102,7 +109,7 @@ async def send_message_trainer(message: Message):
 
     try:
         await bot.send_message(chat_id=TRAINER_ID, text=f"""
-        🔔 НОВЫЙ ЗАКАЗ НА ИНДИВИДУАЛЬНУЮ ПРОГРАММУ ТРЕНИРОВОК
+        🔔 <b>НОВЫЙ ЗАКАЗ НА ИНДИВИДУАЛЬНУЮ ПРОГРАММУ ТРЕНИРОВОК</b>
 ━━━━━━━━━━━━━━
 👤 Клиент: {message.from_user.first_name}
 📋 Анкета клиента:
@@ -115,7 +122,7 @@ async def send_message_trainer(message: Message):
 • 🚬 Привычки, требующие учёта: {information['bad_habbits']}
 🎯 Цели и дополнительная информация:
 {information['additional_information']}
-        """, request_timeout=30)
+        """, parse_mode="html")
         return True
     
     except TelegramNetworkError as e:
