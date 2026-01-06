@@ -73,7 +73,7 @@ async def message_to_trainer_2(message: Message):
         await bot.send_message(chat_id=TRAINER_ID, text=f"""
         🔔 <b>НОВЫЙ ЗАКАЗ НА ИНДИВИДУАЛЬНЫЙ ПЛАН ПИТАНИЯ</b>
 ━━━━━━━━━━━━━━
-👤 Клиент: {message.from_user.first_name}
+👤 Клиент: @{message.from_user.username}
 📋 Анкета клиента:
 • 🎂 Возраст: {information['age']}
 • 📏 Рост: {information['hight']}
