@@ -9,7 +9,9 @@ from app.panels.user_panel import user_router
 from app.survey import survey_router
 from app.training_program import program_training_router
 from app.payments import payment_router
-
+from app.technical_support import support_router
+from app.meal_plan import meal_plan_router
+from app.progress_user import user_progress_router
 
 
 tracemalloc.start() # Включает трассировку, отслеживающую распреление памяти в программе
@@ -19,7 +21,10 @@ async def main():
     dp.include_router(user_router)
     dp.include_router(survey_router)
     dp.include_router(program_training_router)
+    dp.include_router(meal_plan_router)
     dp.include_router(payment_router)
+    dp.include_router(support_router)
+    dp.include_router(user_progress_router)
     
     # Запуск бота
     await AsyncCore.create_db()
@@ -27,7 +32,6 @@ async def main():
     # except:
     #     await bot.session.close()
         
-
 
 # Запуск нашего проекта
 if __name__ == "__main__":

@@ -4,8 +4,8 @@ from dotenv import load_dotenv
 from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery, LabeledPrice, PreCheckoutQuery
 
-import app.keyboards.keyboards as kb 
-import app.keyboards.inline_keyboards as inl_kb
+import app.keyboards.Reply_keyboards.keyboards as kb 
+import app.keyboards.inline_keyboards.payment_keyboard as inl_kb
 
 import Database.requests.orm as rq_orm
 
@@ -17,12 +17,13 @@ load_dotenv()
 PROVIDER_TOKEN = os.getenv("PROVIDER_TOKEN")
 
 
-
 """     ----- Платная подписка для пользователя -----     """
 
-
-async def paid_subscription(message: Message):
-    await message.answer("""
+@payment_router.callback_query(F.data == "buy_subscribe")
+async def paid_subscription(callback: CallbackQuery):
+    await callback.answer()
+    
+    await callback.message.edit_text("""
 🎯 Для получения персонализированной программы тренировок и полного доступа к функционалу необходима подписка
 
 Что входит в подписку:
@@ -36,13 +37,15 @@ async def paid_subscription(message: Message):
 💎 Это не просто программа — это ваша персональная система преобразования.
 
 Готовы начать? Оформите подписку, и мы отправим вам детали доступа в течение 5 минут.
-""", reply_markup=kb.paid_subscription_kb)
+""", reply_markup=inl_kb.paid_subscription_kb)
     
 
 # Приобритение платной подписки
-@payment_router.message(F.text == "Приобрести подписку прямо сейчас")
-async def purchasing_ps(message: Message):
-    await message.answer("""
+@payment_router.callback_query(F.data == "buy_subscribe_now")
+async def purchasing_ps(callback: CallbackQuery):
+    await callback.answer()
+    
+    await callback.message.edit_text("""
 💰 Стоимость подписки (оплата через WebApp):
 • 1 месяц — 399 ₽
 • 3 месяца — 699 ₽ (эффективно 233 ₽/мес)

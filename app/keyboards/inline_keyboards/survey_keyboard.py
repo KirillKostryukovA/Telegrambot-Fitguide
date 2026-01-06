@@ -1,15 +1,6 @@
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-
-main_menu_map = {
-    'survey': '📊 Пройти опрос',
-    'training_prog': '🎯 Индивидуальная программа тренировок',
-    'meal_plan': '🥗 Индивидуальный план питания',
-    'free_training_plan': '💪 Готовые тренировки',
-    'user_progress': '📈 Мой прогресс',
-    'help_for_user': '❓ Помощь / FAQ',
-}
 
 activity_map = {
     "very_hight": "Каждый день",
@@ -24,14 +15,6 @@ sleep_time_map = {
     "normal": "6-8 часов",
     "very_bad": "Менее 6 часов",
 }
-
-# Главное меню
-async def main_menu_kb():
-    keyboard = InlineKeyboardBuilder()
-    for items, values in main_menu_map.items():
-        keyboard.add(InlineKeyboardButton(text=values, callback_data=f"{items}"))
-    return keyboard.adjust(2).as_markup()
-
 
 gender_kb = InlineKeyboardMarkup(inline_keyboard=[
     [InlineKeyboardButton(
@@ -84,50 +67,6 @@ update_data_survey_kb = InlineKeyboardMarkup(inline_keyboard=[
         )],
     [InlineKeyboardButton(
         text="Нет, всё актуально",
-        callback_data="back_main_menu"
-    )],
-],)
-
-
-purchasing_ps_kb = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton(
-        text="1 месяц — 399 ₽",
-        callback_data="sub_1_month",
-    )],
-    [InlineKeyboardButton(
-        text="3 месяца — 699 ₽",
-        callback_data="sub_3_month",
-    )],
-    [InlineKeyboardButton(
-        text="6 месяцев — 999 ₽",
-        callback_data="sub_6_month",
-    )],
-    [InlineKeyboardButton(
-        text="1 год — 1 700 ₽",
-        callback_data="sub_1_year",
-    )],
-],)
-
-
-training_program_kb = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton(
-        text="Да, хочу идеальную программу тренировок",
-        callback_data="perfect_program_training"
-    )],
-    [InlineKeyboardButton(
-        text="Нет, в следующий раз",
-        callback_data="get_free_program_training"
-    )],
-],)
-
-
-user_profile_kb = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton(
-        text="Изменить данные",
-        callback_data="change_data_user"
-    )],
-    [InlineKeyboardButton(
-        text="Вернуться в главное меню",
         callback_data="back_main_menu"
     )],
 ],)

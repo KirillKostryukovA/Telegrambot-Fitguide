@@ -6,8 +6,8 @@ from aiogram.fsm.context import FSMContext
 
 from app.panels.user_panel import main_menu
 
-import app.keyboards.keyboards as kb
-import app.keyboards.inline_keyboards as inl_kb
+import app.keyboards.Reply_keyboards.keyboards as kb
+import app.keyboards.inline_keyboards.survey_keyboard as inl_kb
 
 import Database.requests.orm as rq_orm
 import Database.requests.core as rq_core

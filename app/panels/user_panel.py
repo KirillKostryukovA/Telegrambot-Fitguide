@@ -6,7 +6,7 @@ import Database.requests.orm as rq_orm
 import Database.requests.core as rq_core
 
 # import app.keyboards.keyboards as kb
-import app.keyboards.inline_keyboards as inl_kb
+import app.keyboards.inline_keyboards.main_menu_keyboard as inl_kb
 
 
 user_router = Router()

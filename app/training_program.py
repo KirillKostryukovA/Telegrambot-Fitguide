@@ -8,7 +8,7 @@ from aiogram.exceptions import TelegramNetworkError
 from app.payments import paid_subscription
 from app.panels.user_panel import main_menu
 
-import app.keyboards.inline_keyboards as inl_kb
+import app.keyboards.inline_keyboards.training_program_keyboard as inl_kb
 
 import Database.requests.orm as rq_orm
 
