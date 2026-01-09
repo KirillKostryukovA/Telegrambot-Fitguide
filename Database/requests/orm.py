@@ -126,4 +126,4 @@ class AsyncOrm():
             ))
             user_dict = sqrt.scalar_one_or_none()
 
-            return user_data_to_human(user_dict) # Маппинг из DB в человекочитаемый вид данныхs
+            return user_data_to_human(user_dict) # Маппинг из DB в человекочитаемый вид данных

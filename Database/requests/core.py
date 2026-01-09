@@ -89,3 +89,25 @@ class AsyncCore():
             await session.execute(stmt)
             await session.execute(stmt_timeblock_survey)
             await session.commit()
+
+    
+    # Обновляем возраст в профиле
+    @staticmethod
+    async def update_age_in_profile(tg_id: int, age_user: int):
+        async with async_session() as session:
+            try:
+                # Переменная хранит айди из User_info
+                user_info = (
+                    select(User_info.id)
+                    .where(User_info.tg_id==tg_id)
+                )
+                
+                await session.execute((
+                    update(User_data)
+                    .where(User_data.id_us_info==user_info)
+                    .values(age=age_user)
+                ))
+                await session.commit()
+
+            except Exception as e:
+                print(f"Ошибка в core: {e}")

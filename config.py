@@ -30,3 +30,6 @@ dp = Dispatcher()
 
 # База данных
 settings_db = Base_Settings()
+
+# Токены админов
+# admins = [int(admin) for admin in os.getenv("ADMIN_ID").split(",")]
