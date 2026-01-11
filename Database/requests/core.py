@@ -111,3 +111,47 @@ class AsyncCore():
 
             except Exception as e:
                 print(f"Ошибка в core: {e}")
+
+
+    # Обновляем рост пользователя
+    @staticmethod
+    async def update_hight_in_profile(tg_id: int, hight_user: int):
+        async with async_session() as session:
+            try:
+                # Переменная хранит айди из User_info
+                user_info = (
+                    select(User_info.id)
+                    .where(User_info.tg_id==tg_id)
+                )
+                
+                await session.execute((
+                    update(User_data)
+                    .where(User_data.id_us_info==user_info)
+                    .values(hight=hight_user)
+                ))
+                await session.commit()
+
+            except Exception as e:
+                print(f"Ошибка в core: {e}")
+
+
+    # Обновляем вес пользователя
+    @staticmethod
+    async def update_weight_in_profile(tg_id: int, weight_user: int):
+        async with async_session() as session:
+            try:
+                # Переменная хранит айди из User_info
+                user_info = (
+                    select(User_info.id)
+                    .where(User_info.tg_id==tg_id)
+                )
+                
+                await session.execute((
+                    update(User_data)
+                    .where(User_data.id_us_info==user_info)
+                    .values(weight=weight_user)
+                ))
+                await session.commit()
+
+            except Exception as e:
+                print(f"Ошибка в core: {e}")

@@ -40,17 +40,17 @@ async def change_data():
 
 
 # Клавиатура для изменения возраста
-async def change_age():
+async def change_data_from_kb():
     keyboard = InlineKeyboardBuilder()
     for item in age_kb:
         if item == "Сохранить ✔️":
-            keyboard.button(text=item, callback_data=f"age:save")
+            keyboard.button(text=item, callback_data=f"save")
         elif item == "Назад  ⏪":
             keyboard.button(text=item, callback_data="change_data_user")
         elif item == "Стереть символ ❌":
-            keyboard.button(text=item, callback_data="age:delete")
+            keyboard.button(text=item, callback_data="delete")
         else:
-            keyboard.button(text=item, callback_data=f"age:{item}")
+            keyboard.button(text=item, callback_data=f"{item}")
     return keyboard.adjust(3).as_markup()
 
 
