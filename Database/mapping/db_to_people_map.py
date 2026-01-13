@@ -1,6 +1,9 @@
 from Database.models import ActivityPeople, GenderPeople
 
 
+""" МАППИНГ С БАЗЫ ДАННЫХ НА ЧЕЛОВЕКОЧИТАЕМЫЕ ДАННЫЕ """
+
+
 GENDER_REVERSE_MAP = {
     GenderPeople.man: "мужской",
     GenderPeople.woman: "Женский",

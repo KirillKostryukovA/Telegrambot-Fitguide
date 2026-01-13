@@ -42,19 +42,8 @@ class AsyncCore():
             stmt1_execute = await session.execute(stmt1)
             stmt_data = stmt1_execute.scalars().all()
             
-
-            # -----     Начало маппинга -----
-            
             
             data = data.copy() # Подготавливаем данные
-
-            # Доп. информация
-            additional_information_map = {
-                "У меня нет никаких ограничений/болезней/аллергий/т.д": None,
-            }
-
-            data['additional_information'] = additional_information_map.get(data['additional_information'], data['additional_information'])
-
 
             if not stmt_data:  
                 # Добавляем информацию о пользователе в таблицу БД, если нет данных в User_data
@@ -155,3 +144,22 @@ class AsyncCore():
 
             except Exception as e:
                 print(f"Ошибка в core: {e}")
+
+
+    # Обновляем активность пользователя
+    @staticmethod
+    async def update_activity_in_profile(tg_id: int, data: str):
+        async with async_session() as session:
+            try:   
+                user_info = select(User_info.id).where(User_info.tg_id==tg_id)
+
+                await session.execute((
+                    update(User_data)
+                    .where(User_data.id_us_info==user_info)
+                    .values(activity=data)
+                ))
+
+                await session.commit()
+
+            except Exception as e:
+                print(f"Произошла неопознанная ошибка в core в update_activity_in_profile: {e}")

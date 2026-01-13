@@ -1,20 +1,8 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
+from Database.mapping.people_to_db_map import activity_map, sleep_time_map
 
-activity_map = {
-    "very_hight": "Каждый день",
-    "hight": "Более 3-х раз в неделю",
-    "middle": "3 раза в неделю",
-    "low": "Вообще не занимаюсь",
-}
-
-sleep_time_map = {
-    "very_long": "Более 10 часов",
-    "long": "8-10 часов",
-    "normal": "6-8 часов",
-    "very_bad": "Менее 6 часов",
-}
 
 gender_kb = InlineKeyboardMarkup(inline_keyboard=[
     [InlineKeyboardButton(

@@ -5,6 +5,8 @@ from aiogram.exceptions import TelegramNetworkError, TelegramAPIError
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 
+from Database.mapping.people_to_db_map import *
+
 import Database.requests.orm as rq_orm
 import Database.requests.core as rq_core
 
@@ -15,7 +17,11 @@ import Database.requests.orm as rq_orm
 
 user_progress_router = Router()
 
-# Машина состояний
+# Машина состояний для данных, которые меняем через клавиатуру с цифрами
+class EditProfileWithKb(StatesGroup):
+    change_data = State()
+
+# Машина состояния для данных, которые меняем через клавиатуру 
 class EditProfile(StatesGroup):
     change_data = State()
 
@@ -98,31 +104,41 @@ async def change_information(callback: CallbackQuery):
 # Возраст
 @user_progress_router.callback_query(F.data == "change_age")
 async def start_change_age(callback: CallbackQuery, state: FSMContext):
-    await start_edit_field(callback, state, "age")
+    await start_edit_field_with_kb(callback, state, "age")
     
 
 # Рост 
 @user_progress_router.callback_query(F.data == "change_hight")
-async def start_change_age(callback: CallbackQuery, state: FSMContext):
-    await start_edit_field(callback, state, "hight")
+async def start_change_hight(callback: CallbackQuery, state: FSMContext):
+    await start_edit_field_with_kb(callback, state, "hight")
 
 
 # Возраст
 @user_progress_router.callback_query(F.data == "change_weight")
-async def start_change_age(callback: CallbackQuery, state: FSMContext):
-    await start_edit_field(callback, state, "weight")
+async def start_change_weight(callback: CallbackQuery, state: FSMContext):
+    await start_edit_field_with_kb(callback, state, "weight")
+
+
+# Активнсоть
+@user_progress_router.callback_query(F.data == "change_activity")
+async def start_change_activity(callback: CallbackQuery, state: FSMContext):
+    await callback.answer()
+    await state.set_state(EditProfile.change_data)
+    
+    await state.update_data(field_type="activity")
+    await callback.message.edit_text("Выберите Вашу активность: ", reply_markup=await inl_kb.change_activity_kb())
 
 
 #     -----    Начало редактирования     -----  
 
 
 # Данные, которые редактируются с помощью клавиатуры: возраст, рост, вес
-async def start_edit_field(callback: CallbackQuery, state: FSMContext, field_type: str):
+async def start_edit_field_with_kb(callback: CallbackQuery, state: FSMContext, field_type: str):
     await callback.answer()
 
     config_dict = EDIT_DATA_CONFIGURATION[field_type]
 
-    await state.set_state(EditProfile.change_data)
+    await state.set_state(EditProfileWithKb.change_data)
     await state.update_data(
         field_type=field_type,
         current_data=""
@@ -134,8 +150,8 @@ async def start_edit_field(callback: CallbackQuery, state: FSMContext, field_typ
 
 
 # Клавиатура, оторбражающая введённый возраст
-@user_progress_router.callback_query(EditProfile.change_data)
-async def finish_edit_field(callback: CallbackQuery, state: FSMContext):
+@user_progress_router.callback_query(EditProfileWithKb.change_data)
+async def finish_edit_field_with_kb(callback: CallbackQuery, state: FSMContext):
     data = await state.get_data()
     field_type = data.get("field_type")
     current_data = data.get("current_data")
@@ -192,3 +208,18 @@ async def finish_edit_field(callback: CallbackQuery, state: FSMContext):
         reply_markup=await inl_kb.change_data_from_kb(), parse_mode="html"
     )
     await callback.answer()
+
+
+# Меняем активность
+@user_progress_router.callback_query(EditProfile.change_data, F.data.startswith("activity:"))
+async def finish_change_activity(callback: CallbackQuery, state: FSMContext):
+    await callback.answer()
+
+    activity_value = callback.data.split(":")[1]
+    await rq_core.AsyncCore.update_activity_in_profile(tg_id=callback.from_user.id, data=activity_value) # Сохраняем в БД
+    
+    # Переводим значение в человекочитаемый вид
+    read_value = activity_map.get(activity_value, "")
+    await callback.message.edit_text(f"Активность обновлена: {read_value}", reply_markup=inl_kb.back_to_profile_kb)
+
+    await state.clear()

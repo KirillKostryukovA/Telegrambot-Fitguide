@@ -5,7 +5,7 @@ from sqlalchemy.orm import selectinload
 
 from Database.database import async_session
 from Database.models import User_info, User_data, GenderPeople, ActivityPeople
-from Database.mapping.user_data_map import user_data_to_human
+from Database.mapping.db_to_people_map import user_data_to_human
 
 
 now = datetime.now(timezone.utc) # Время сейчас
