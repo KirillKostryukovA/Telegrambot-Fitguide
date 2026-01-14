@@ -34,6 +34,17 @@ user_profile_kb = InlineKeyboardMarkup(inline_keyboard=[
 ],)
 
 
+if_not_sub_kb = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton(
+        text="💎 Купить подписку",
+        callback_data="buy_subscribe_now",
+    )],
+    [InlineKeyboardButton(
+        text="Вернуться в главное меню",
+        callback_data="back_main_menu",
+    )],
+])
+
 # Клавиатура выбора изменения каких-либо данных
 async def change_data():
     keyboard = InlineKeyboardBuilder()

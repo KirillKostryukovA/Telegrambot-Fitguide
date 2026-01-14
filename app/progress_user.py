@@ -63,6 +63,12 @@ EDIT_DATA_CONFIGURATION = {
 async def user_profile(callback: CallbackQuery):
     await callback.answer()
     
+    sub = await rq_orm.AsyncOrm.verification_sub(tg_id=callback.from_user.id)
+
+    if sub == False:
+        await callback.message.edit_text("Для того, чтобы иметь информацию о своих прогрессах, изменять статистику, необходимо приобрести подписку!", reply_markup=inl_kb.if_not_sub_kb) 
+        return 
+    
     try:
         information = await rq_orm.AsyncOrm.information_about_user(tg_id=callback.from_user.id)
         
