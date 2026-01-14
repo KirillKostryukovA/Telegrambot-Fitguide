@@ -129,6 +129,15 @@ async def start_change_activity(callback: CallbackQuery, state: FSMContext):
     await callback.message.edit_text("Выберите Вашу активность: ", reply_markup=await inl_kb.change_activity_kb())
 
 
+# Время сна
+@user_progress_router.callback_query(F.data == "change_sleep_time")
+async def start_change_sleep_time(callback: CallbackQuery, state: FSMContext):
+    await callback.answer()
+
+    await state.set_state(EditProfile.change_data)
+    await callback.message.edit_text("Выберите время сна: ", reply_markup=await inl_kb.change_sleep_time_kb())
+
+
 #     -----    Начало редактирования     -----  
 
 
@@ -221,5 +230,20 @@ async def finish_change_activity(callback: CallbackQuery, state: FSMContext):
     # Переводим значение в человекочитаемый вид
     read_value = activity_map.get(activity_value, "")
     await callback.message.edit_text(f"Активность обновлена: {read_value}", reply_markup=inl_kb.back_to_profile_kb)
+
+    await state.clear()
+
+
+# Меняем время сна
+@user_progress_router.callback_query(EditProfile.change_data, F.data.startswith("sleep_time:"))
+async def finish_change_sleep_time(callback: CallbackQuery, state: FSMContext):
+    await callback.answer()
+
+    data = callback.data.split(":")[1]
+    await rq_core.AsyncCore.update_sleep_time_in_profile(tg_id=callback.from_user.id, data=data)
+
+    # Человекочитаемый вид времени сна
+    read_data = activity_map.get(data, "")
+    await callback.message.edit_text(f"Время сна обновлено: {read_data}", reply_markup=inl_kb.back_to_profile_kb)
 
     await state.clear()

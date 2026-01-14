@@ -99,7 +99,7 @@ class AsyncCore():
                 await session.commit()
 
             except Exception as e:
-                print(f"Ошибка в core: {e}")
+                print(f"Ошибка в core в update_age_in_profile: {e}")
 
 
     # Обновляем рост пользователя
@@ -121,7 +121,7 @@ class AsyncCore():
                 await session.commit()
 
             except Exception as e:
-                print(f"Ошибка в core: {e}")
+                print(f"Ошибка в core в update_hight_in_profile: {e}")
 
 
     # Обновляем вес пользователя
@@ -162,4 +162,23 @@ class AsyncCore():
                 await session.commit()
 
             except Exception as e:
-                print(f"Произошла неопознанная ошибка в core в update_activity_in_profile: {e}")
+                print(f"Произошла ошибка в core в update_activity_in_profile: {e}")
+
+
+    # Обновляем время сна пользователя 
+    @staticmethod
+    async def update_sleep_time_in_profile(tg_id: int, data: str):
+        async with async_session() as session:
+            try:
+                user_info = select(User_info.id).where(User_info.tg_id == tg_id)
+
+                await session.execute((
+                    update(User_data)
+                    .where(User_data.id_us_info==user_info)
+                    .values(activity=data)
+                ))
+
+                await session.commit()
+
+            except Exception as e:
+                print(f"Произошла ошибка в core в update_sleep_time_in_profile: {e}")
