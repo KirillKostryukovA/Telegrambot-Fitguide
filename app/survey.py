@@ -6,8 +6,8 @@ from aiogram.fsm.context import FSMContext
 
 from app.panels.user_panel import main_menu
 
-import app.keyboards.Reply_keyboards.keyboards as kb
 import app.keyboards.inline_keyboards.survey_keyboard as inl_kb
+import app.keyboards.inline_keyboards.main_menu_keyboard as main_kb
 
 import Database.requests.orm as rq_orm
 import Database.requests.core as rq_core
@@ -58,7 +58,10 @@ async def survey_for_user2(message: Message, state: FSMContext):
     if not message.text.isdigit():
         await message.answer("Введите возраст числом!")
         return 
-    
+    if int(message.text) < 10 or int(message.text) > 80 or len(message.text) > 2:
+        await message.answer("Введите Ваш реальный возраст!")
+        return
+
     await state.update_data(age=int(message.text))
     await state.set_state(Survey_user.hight)
     await message.answer("Введите Ваш рост (см) числом:")
@@ -70,6 +73,9 @@ async def survey_for_user3(message: Message, state: FSMContext):
     if not message.text.isdigit():
         await message.answer("Введите рост числом!")
         return 
+    if int(message.text) < 150 or int(message.text) > 250 or len(message.text) > 3:
+        await message.answer("Введите Ваш реальный рост!")
+        return
     
     await state.update_data(hight=int(message.text))
     await state.set_state(Survey_user.weight)
@@ -82,6 +88,9 @@ async def survey_for_user3(message: Message, state: FSMContext):
 async def survey_for_user4(message: Message, state: FSMContext):
     if not message.text.isdigit():
         await message.answer("Введите вес числом!")
+        return
+    if int(message.text) < 40 or int(message.text) > 500 or len(message.text) > 3:
+        await message.answer("Введите Ваш реальный вес!")
         return
 
     await state.update_data(weight=int(message.text)) # Сохраняем информацию о возрасте
@@ -163,7 +172,7 @@ async def survey_for_user9(message: Message, state: FSMContext):
     try:
         await rq_core.AsyncCore.insert_info_about_user(tg_id=message.from_user.id, data=data) # Возвращаем все данные в функцию в Core
         await state.clear() # Очищаем собранную информацию
-        await message.answer("Спасибо большое за прохождение опроса, исходя из Ваших данных мы отправим Вам подходящую программу тренировок!", reply_markup=ReplyKeyboardRemove())
+        await message.answer("Спасибо большое за прохождение опроса, исходя из Ваших данных мы отправим Вам подходящую программу тренировок!", reply_markup=await main_kb.main_menu_kb())
 
     except Exception as e:
         print(f"Неизвестная ошибка: {e}")

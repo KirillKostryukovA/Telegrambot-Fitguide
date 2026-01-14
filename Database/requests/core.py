@@ -175,10 +175,29 @@ class AsyncCore():
                 await session.execute((
                     update(User_data)
                     .where(User_data.id_us_info==user_info)
-                    .values(activity=data)
+                    .values(sleep_time=data)
                 ))
 
                 await session.commit()
 
             except Exception as e:
                 print(f"Произошла ошибка в core в update_sleep_time_in_profile: {e}")
+
+
+    # Обновляем дополнительную информацию о пользователе
+    @staticmethod
+    async def update_additional_information_in_profile(tg_id: int, data: str):
+        async with async_session() as session:
+            try:
+                user_info = select(User_info.id).where(User_info.tg_id == tg_id)
+
+                await session.execute((
+                    update(User_data)
+                    .where(User_data.id_us_info==user_info)
+                    .values(additional_information=data)
+                ))
+
+                await session.commit()
+
+            except Exception as e:
+                print(f"Произошла ошибка в core в update_additional_information_in_profile: {e}")

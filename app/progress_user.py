@@ -1,5 +1,5 @@
 from aiogram import Router, F
-from aiogram.types import CallbackQuery
+from aiogram.types import CallbackQuery, Message
 from aiogram.exceptions import TelegramNetworkError, TelegramAPIError
 
 from aiogram.fsm.state import State, StatesGroup
@@ -138,6 +138,26 @@ async def start_change_sleep_time(callback: CallbackQuery, state: FSMContext):
     await callback.message.edit_text("Выберите время сна: ", reply_markup=await inl_kb.change_sleep_time_kb())
 
 
+# Дополнительная информация 
+@user_progress_router.callback_query(F.data == "change_additional_information")
+async def start_change_additional_information(callback: CallbackQuery, state: FSMContext):
+    await callback.answer()
+
+    await state.set_state(EditProfile.change_data)
+    await callback.message.edit_text("""
+✏️ Изменение дополнительной информации и целей
+
+Пожалуйста, опишите подробно:
+
+    Ваша следующая цель (например, похудение, набор мышечной массы, поддержание формы, повышение выносливости).
+
+    Все противопоказания и рекомендации врача, которые нам необходимо учитывать (травмы, хронические заболевания, ограничения по нагрузкам и т.д.).
+
+⚠️ Внимание! После сохранения все ваши предыдущие дополнительные данные будут полностью заменены на новые.
+Убедитесь, что новый текст включает и цель, и информацию о здоровье.
+""", reply_markup=inl_kb.back_to_profile_kb) 
+
+
 #     -----    Начало редактирования     -----  
 
 
@@ -245,5 +265,21 @@ async def finish_change_sleep_time(callback: CallbackQuery, state: FSMContext):
     # Человекочитаемый вид времени сна
     read_data = activity_map.get(data, "")
     await callback.message.edit_text(f"Время сна обновлено: {read_data}", reply_markup=inl_kb.back_to_profile_kb)
+
+    await state.clear()
+
+
+# Меняем дополнительную информацию о пользователе 
+@user_progress_router.message(EditProfile.change_data)
+async def finish_change_additional_information(message: Message, state: FSMContext):
+    await state.update_data(field_type=message.text)
+
+    info_data = await state.get_data()
+
+    # Если у нас текст не равен "Назад  ⏪", то продолжаем редактировать 
+    for values in info_data.values():
+        await rq_core.AsyncCore.update_additional_information_in_profile(tg_id=message.from_user.id, data=values)
+            
+        await message.answer("Ваша дополнительная информация успешно была изменена!", reply_markup=inl_kb.back_to_profile_kb)
 
     await state.clear()

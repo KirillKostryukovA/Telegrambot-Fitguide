@@ -62,7 +62,7 @@ async def change_activity_kb():
     keyboard = InlineKeyboardBuilder()
     for keys, values in activity_map.items():
         keyboard.button(text=values, callback_data=f"activity:{keys}")
-    keyboard.add(InlineKeyboardButton(text="Назад  ⏪", callback_data="user_progress"))
+    keyboard.add(InlineKeyboardButton(text="Назад  ⏪", callback_data="change_data_user"))
     return keyboard.adjust(2).as_markup()
 
 
@@ -71,7 +71,7 @@ async def change_sleep_time_kb():
     keyboard = InlineKeyboardBuilder()
     for keys, values in sleep_time_map.items():
         keyboard.add(InlineKeyboardButton(text=values, callback_data=f"sleep_time:{keys}"))
-    keyboard.add(InlineKeyboardButton(text="Назад  ⏪", callback_data="user_progress"))
+    keyboard.add(InlineKeyboardButton(text="Назад  ⏪", callback_data="change_data_user"))
     return keyboard.adjust(2).as_markup()
 
 
