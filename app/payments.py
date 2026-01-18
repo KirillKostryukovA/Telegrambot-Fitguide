@@ -1,13 +1,16 @@
 import os
+import asyncio
+
+from datetime import *
 from dotenv import load_dotenv
 
 from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery, LabeledPrice, PreCheckoutQuery
 
-import app.keyboards.Reply_keyboards.keyboards as kb 
 import app.keyboards.inline_keyboards.payment_keyboard as inl_kb
 
 import Database.requests.orm as rq_orm
+import Database.requests.core as rq_core
 
 
 payment_router = Router()
@@ -57,6 +60,22 @@ async def purchasing_ps(callback: CallbackQuery):
 """, reply_markup=inl_kb.purchasing_ps_kb)
     
 
+# Подписка на 3 дня 
+@payment_router.callback_query(F.data == "sub_3_days")
+async def three_days_payment_sub(callback: CallbackQuery):
+    await callback.message.answer_invoice(
+        title="Подписка на 3 дня",
+        description="Доступ ко всем функциям в течение 3-х дней",
+        payload="sub_3_days",
+        provider_token=PROVIDER_TOKEN,
+        currency="RUB",
+        prices=[LabeledPrice(label="3 дня", amount=30000),],
+        start_parameter="sub_3d"
+    )
+
+    await callback.answer()
+
+
 # Подписка на 1 месяц
 @payment_router.callback_query(F.data == "sub_1_month")
 async def one_month_payment_sub(callback: CallbackQuery):
@@ -96,8 +115,8 @@ async def six_month_payment_sub(callback: CallbackQuery):
         title="Подписка на 6 месяцев",
         description="Доступ ко всем функциям на 6 месяцев",
         payload="sub_6_month",
-        provider_token=PROVIDER_TOKEN,
         currency="RUB",
+        provider_token=PROVIDER_TOKEN,
         prices=[LabeledPrice(label="6 месяцев", amount=99900),],
         start_parameter="sub_6"
     )
@@ -150,3 +169,45 @@ async def successful_payment(message: Message):
 @payment_router.message(F.failed_payment)
 async def failed_payments(message: Message):
     await message.answer("❌ Оплата не прошла. Пожалуйста, попробуйте еще раз.")
+
+
+# Если до окончания подписки остаётся 3 дня, то мы должны обязательно напомнить об этом пользователя
+async def warning_watcher(bot):
+    while True:
+        users = await rq_orm.AsyncOrm.information_about_user_info()
+
+        now = datetime.now(timezone.utc) # Время на данный момент
+
+        for user in users:
+            if user.subscription_duration is None:
+                continue
+            if user.subscription_warned == True:
+                continue
+            else:
+                reminds = user.subscription_duration - now 
+                tg_id_user = user.tg_id
+
+                # Если разница меньше 3 дней, то отправляем уведомление
+                if timedelta(days=2) < reminds <= timedelta(days=3):
+                    await bot.send_message(
+                        chat_id=tg_id_user,
+                        text="""
+🔄 Ваша подписка активна ещё 3 дня!\n
+Чтобы не потерять доступ к персональной программе, плану питания и марафону — вовремя продлите подписку.
+""")
+                if reminds <= timedelta(days=0):
+                    await bot.send_message(
+                        chat_id=tg_id_user,
+                        text="""
+⚠️ Доступ приостановлен\n
+Ваша подписка истекла. Чтобы возобновить работу с персональной программой, планом питания и продолжить участие в марафоне — необходимо обновить подписку.
+\n
+🔓 Что вы сейчас не можете использовать:
+• Вашу индивидуальную программу тренировок и питания
+• Закрытый марафон и чат поддержки
+• Обновления и персональные рекомендации
+""")
+                    await rq_core.AsyncCore.warning_is_true(tg_id=tg_id_user) # Для того, чтобы пользователь больше не получал уведомление от бота об истекающей подписке
+
+        # Бот будет присылать уведомление в периоде 24 часа
+        await asyncio.sleep(24 * 60 * 60)

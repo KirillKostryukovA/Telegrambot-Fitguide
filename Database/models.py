@@ -31,6 +31,7 @@ class User_info(Base):
     paid_subcreption: Mapped[bool] = mapped_column(default=False)
     subscription_duration: Mapped[datetime.datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     survey_available_at: Mapped[datetime.datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    subscription_warned: Mapped[bool] = mapped_column(default=False)
 
     data: Mapped[list["User_data"]] = relationship(back_populates="info", cascade="all, delete-orphan")
 

@@ -7,7 +7,7 @@ from Database.models import User_data, User_info, GenderPeople, ActivityPeople
 
 
 now = datetime.now(timezone.utc) 
-BLOCK_TIME = timedelta(minutes=1) # Представляет разницу между двумя моментами времени
+BLOCK_TIME = timedelta(hours=24) # Представляет разницу между двумя моментами времени
 
 
 class AsyncCore():
@@ -201,3 +201,15 @@ class AsyncCore():
 
             except Exception as e:
                 print(f"Произошла ошибка в core в update_additional_information_in_profile: {e}")
+
+
+    # Сообщаем бд, что пользователь получил уведомление об истекающей подписке
+    @staticmethod
+    async def warning_is_true(tg_id: int):
+        async with async_session() as session:
+            await session.execute((
+                update(User_info)
+                .where(User_info.tg_id==tg_id)
+                .values(subscription_warned=True)
+            ))
+            await session.commit()

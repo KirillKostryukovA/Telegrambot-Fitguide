@@ -12,6 +12,7 @@ now = datetime.now(timezone.utc) # Время сейчас
 
 # Список для того, чтобы зафиксировать дату подписки пользователя 
 SUBSCRIPTION_TIME_MAP = {
+    "sub_3_days" : timedelta(days=3),
     "sub_1_month" : timedelta(days=30),
     "sub_3_month" : timedelta(days=90),
     "sub_6_month" : timedelta(days=180),
@@ -114,7 +115,7 @@ class AsyncOrm():
             return True
         
 
-    # Информация о пользователе в человекочитаемом виде 
+    # Информация о пользователе в человекочитаемом виде  (Вся информация о пользователе в схеме User_data)
     @staticmethod
     async def information_about_user(tg_id: int) -> dict:
         async with async_session() as session:
@@ -127,3 +128,15 @@ class AsyncOrm():
             user_dict = sqrt.scalar_one_or_none()
 
             return user_data_to_human(user_dict) # Маппинг из DB в человекочитаемый вид данных
+        
+
+    # Вся информация о пользователе в схеме User_info
+    @staticmethod
+    async def information_about_user_info():
+        async with async_session() as session:
+            stmt = await session.execute((
+                select(User_info)
+            ))
+            result = stmt.scalars().all()
+
+            return result # Возвращаем список с информацией о пользователе из User_info

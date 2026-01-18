@@ -18,6 +18,10 @@ paid_subscription_kb = InlineKeyboardMarkup(inline_keyboard=[
 # Кнопки выбора определённой подписки
 purchasing_ps_kb = InlineKeyboardMarkup(inline_keyboard=[
     [InlineKeyboardButton(
+        text="3 дня — 30 ₽",
+        callback_data="sub_3_days",
+    )],
+    [InlineKeyboardButton(
         text="1 месяц — 399 ₽",
         callback_data="sub_1_month",
     )],
