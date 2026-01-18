@@ -32,5 +32,5 @@ dp = Dispatcher()
 settings_db = Base_Settings()
 
 # Токены 
-admins = [int(admin) for admin in os.getenv("ADMIN_ID")]
-trainers = [int(trainer) for trainer in os.getenv("TRAINER_ID")]
+# admins = [int(admin) for admin in os.getenv("ADMIN_ID")]
+# trainers = [int(trainer) for trainer in os.getenv("TRAINER_ID")]

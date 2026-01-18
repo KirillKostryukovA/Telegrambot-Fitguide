@@ -5,12 +5,8 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 # Спрашиваем пользователя о приобритении подписки
 paid_subscription_kb = InlineKeyboardMarkup(inline_keyboard=[
     [InlineKeyboardButton(
-        text="Приобрести подписку прямо сейчас",
+        text="Приобрести подписку прямо сейчас 💎",
         callback_data="buy_subscribe_now",
-    )],
-    [InlineKeyboardButton(
-        text="Приобрести позже",
-        callback_data="back_main_menu",
     )],
 ])
 
