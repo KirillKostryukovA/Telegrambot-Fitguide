@@ -34,7 +34,7 @@ async def personal_meal_plan(callback: CallbackQuery):
         return await paid_subscription(callback)
     # Если пользователь не проходил опрос
     elif is_data_survey is False:
-        await callback.message.edit_text("Для того, чтобы получить личный план питания Вам необходимо пройти опрос, на основании которого мы сделаем Вам подходящиый план питания!")
+        await callback.message.answer("Для того, чтобы получить личный план питания Вам необходимо пройти опрос, на основании которого мы сделаем Вам подходящиый план питания!")
         return await main_menu(callback)
 
     try:

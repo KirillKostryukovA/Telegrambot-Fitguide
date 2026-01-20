@@ -76,7 +76,7 @@ async def get_paid_training_program(callback: CallbackQuery):
         if is_paid is False:
             return await paid_subscription(callback)
         elif is_data_survey is False:
-            await callback.message.edit_text("Для того, чтобы мы могли отправить Вам индивидуальную программу тренировок, пройдите опрос")
+            await callback.message.answer("Для того, чтобы мы могли отправить Вам индивидуальную программу тренировок, пройдите опрос")
             return await main_menu(callback)
         
 

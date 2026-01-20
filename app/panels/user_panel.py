@@ -1,3 +1,6 @@
+import os
+from dotenv import load_dotenv
+
 from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery
 from aiogram.filters.command import CommandStart
@@ -8,12 +11,22 @@ import Database.requests.core as rq_core
 # import app.keyboards.keyboards as kb
 import app.keyboards.inline_keyboards.main_menu_keyboard as inl_kb
 
+from app.panels.admin_panel import main_menu_admin
+
 
 user_router = Router()
+
+load_dotenv()
+admins = int(os.getenv("ADMIN_ID"))
+
 
 # Главное меню (вызов через Start)
 @user_router.message(CommandStart())
 async def main_menu(message: Message):
+    # Если пользователь есть в админах
+    if message.from_user.id == admins:
+        return await main_menu_admin(message)
+    
     await rq_orm.AsyncOrm.get_user_tg_id(message.from_user.id) # Функция, чтобы получить tg_id пользователя
     await message.answer(f"""
 🏋️‍♂️ Привет, {message.from_user.first_name}!

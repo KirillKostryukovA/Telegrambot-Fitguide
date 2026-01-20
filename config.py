@@ -20,9 +20,12 @@ class Base_Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 
-# Данные бота
+# Токены
 load_dotenv() # Ищет файл .env
 BOT_TOKEN = os.getenv("BOT_TOKEN")
+ADMIN_ID = os.getenv("ADMIN_ID")
+TRAINER_ID = os.getenv("TRAINER_ID")
+
 
 # Токен бота с диспетчером
 bot = Bot(token=BOT_TOKEN)
@@ -30,7 +33,3 @@ dp = Dispatcher()
 
 # База данных
 settings_db = Base_Settings()
-
-# Токены 
-# admins = [int(admin) for admin in os.getenv("ADMIN_ID")]
-# trainers = [int(trainer) for trainer in os.getenv("TRAINER_ID")]
