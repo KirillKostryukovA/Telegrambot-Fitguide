@@ -30,4 +30,16 @@ whom_to_send_kb = InlineKeyboardMarkup(inline_keyboard=[
         text="В закрытый тгк",
         callback_data="to_close_chanel",
     )],
+    [InlineKeyboardButton(
+        text="Вернуться в главное менбю",
+        callback_data="back_main_menu_admin"
+    )],
+])
+
+
+back_main_menu_kb = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton(
+        text="Вернуться в главное менбю",
+        callback_data="back_main_menu_admin"
+    )]
 ])

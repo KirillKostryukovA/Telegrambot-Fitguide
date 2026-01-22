@@ -1,6 +1,6 @@
 from datetime import *
 
-from sqlalchemy import insert, select, update
+from sqlalchemy import insert, select, update, cast, Integer, String
 
 from Database.database import Base, async_engine, async_session
 from Database.models import User_data, User_info, GenderPeople, ActivityPeople
@@ -213,3 +213,12 @@ class AsyncCore():
                 .values(subscription_warned=True)
             ))
             await session.commit()
+
+
+    # Функция, проверяющая, есть ли пользователь с таким айди
+    @staticmethod
+    async def is_tg_id_real(tg_id: int) -> bool:
+        async with async_session() as session:
+            sqrt = await session.scalar(select(User_info).where(cast(User_info.tg_id, String) == tg_id))
+
+            return False if sqrt is None else True
