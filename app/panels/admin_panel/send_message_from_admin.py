@@ -3,7 +3,6 @@ from dotenv import load_dotenv
 
 from aiogram import F, Router
 from aiogram.types import CallbackQuery, Message
-from aiogram.filters import CommandStart
 from aiogram.exceptions import TelegramAPIError, TelegramBadRequest, TelegramNetworkError
 
 from aiogram.fsm.context import FSMContext
@@ -14,10 +13,11 @@ import app.keyboards.inline_keyboards.admin_panel_kb as inl_kb
 import Database.requests.orm as rq_orm
 import Database.requests.core as rq_core
 
+from app.panels.admin_panel.admin_menu import main_menu_admin
 from config import bot
 
 
-admin_panel_router = Router()
+send_message_admin_router = Router()
 
 
 load_dotenv()
@@ -41,34 +41,10 @@ class Send_message(StatesGroup):
     what = State() 
 
 
-# Главное меню в админ панеле
-@admin_panel_router.message(CommandStart())
-async def main_menu_admin(message: Message):
-    if message.from_user.id == admins:
-        await message.answer("""
-    👨‍💼 АДМИН-ПАНЕЛЬ | FitGuide
-
-    Выберите действие:
-    """, reply_markup=inl_kb.main_menu_kb)
-        
-
-# Главное меню в админ панеле (Через CallbackQuery)
-@admin_panel_router.callback_query(F.data == "back_main_menu_admin")
-async def main_menu_admin_callback(callback: CallbackQuery):
-    await callback.answer()
-    
-    if callback.from_user.id == admins:
-        await callback.message.edit_text("""
-    👨‍💼 АДМИН-ПАНЕЛЬ | FitGuide
-
-    Выберите действие:
-    """, reply_markup=inl_kb.main_menu_kb)
-        
-
 """                  Начало отправления сообщения                  """
 
 
-@admin_panel_router.callback_query(F.data == "send_message_to_chat")
+@send_message_admin_router.callback_query(F.data == "send_message_to_chat")
 async def start_send_message(callback: CallbackQuery, state: FSMContext):
     await callback.answer()
 
@@ -77,7 +53,7 @@ async def start_send_message(callback: CallbackQuery, state: FSMContext):
 
 
 # Что отправить в сообщении
-@admin_panel_router.callback_query(Send_message.who, F.data != "special_user")
+@send_message_admin_router.callback_query(Send_message.who, F.data != "special_user")
 async def continue_send_message(callback: CallbackQuery, state: FSMContext):
     await callback.answer()
     
@@ -93,7 +69,7 @@ async def continue_send_message(callback: CallbackQuery, state: FSMContext):
 """                  Начало отправления сообщения конкретному пользователю                  """
 
 
-@admin_panel_router.callback_query(Send_message.who, F.data == "special_user")
+@send_message_admin_router.callback_query(Send_message.who, F.data == "special_user")
 async def continue_send_message_spec_user(callback: CallbackQuery, state: FSMContext):
     await callback.answer()
 
@@ -105,7 +81,7 @@ async def continue_send_message_spec_user(callback: CallbackQuery, state: FSMCon
     await callback.message.answer("Введите tg-айди пользователя, которому Вы хотите написать", reply_markup=inl_kb.back_main_menu_kb)
 
 
-@admin_panel_router.message(Send_message.id_user_from_tg)
+@send_message_admin_router.message(Send_message.id_user_from_tg)
 async def continue2_send_message_spec_user(message: Message, state: FSMContext):
     search_id = message.text
     
@@ -127,7 +103,7 @@ async def continue2_send_message_spec_user(message: Message, state: FSMContext):
 """              ОТПРАВКА СООБЩЕНИЯ              """
 
 
-@admin_panel_router.message(Send_message.what)
+@send_message_admin_router.message(Send_message.what)
 async def finish_send_message(message: Message, state: FSMContext):
     try:  
         rq = await rq_orm.AsyncOrm.information_about_user_info()

@@ -12,7 +12,9 @@ from app.payments import payment_router, warning_watcher
 from app.technical_support import support_router
 from app.meal_plan import meal_plan_router
 from app.progress_user import user_progress_router
-from app.panels.admin_panel import admin_panel_router
+from app.panels.admin_panel.admin_menu import admin_panel_router
+from app.panels.admin_panel.send_message_from_admin import send_message_admin_router
+from app.panels.admin_panel.search_user import search_user_router
 
 
 tracemalloc.start() # Включает трассировку, отслеживающую распреление памяти в программе
@@ -31,6 +33,8 @@ async def main():
     dp.include_router(support_router)
     dp.include_router(user_progress_router)
     dp.include_router(admin_panel_router)
+    dp.include_router(send_message_admin_router)
+    dp.include_router(search_user_router)
 
     # Задачи, выполняемые ботом параллельно его действиям с пользователем
     dp.startup.register(on_startup) # Проверяет время окончания подписки

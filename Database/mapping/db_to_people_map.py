@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from Database.models import ActivityPeople, GenderPeople
 
 
@@ -24,7 +26,6 @@ SLEEP_TIME_REVERSE_MAP = {
     "very_bad": "Менее 6 часов",
 }
 
-
 # Функция для маппинга данных из DB в челочекочитаемый вид
 def user_data_to_human(user_data: dict) -> dict:
     return {
@@ -40,4 +41,6 @@ def user_data_to_human(user_data: dict) -> dict:
         "additional_information": (
             "Нет" if user_data.additional_information is None else user_data.additional_information
         ),
+        "created_at": user_data.created_at.strftime('%Y-%m-%d'),
+        "updated_at": user_data.updated_at.strftime('%Y-%m-%d'),
     }

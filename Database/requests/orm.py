@@ -130,7 +130,7 @@ class AsyncOrm():
             return user_data_to_human(user_dict) # Маппинг из DB в человекочитаемый вид данных
         
 
-    # Вся информация о пользователе в схеме User_info
+    # Парсим данные всех пользователей из User_info
     @staticmethod
     async def information_about_user_info():
         async with async_session() as session:
@@ -138,5 +138,18 @@ class AsyncOrm():
                 select(User_info)
             ))
             result = stmt.scalars().all()
+
+            return result # Возвращаем список с информацией о пользователе из User_info
+        
+
+    # Вся информация о пользователе в схеме User_info
+    @staticmethod
+    async def information_about_user_info_one(tg_id: int) -> dict:
+        async with async_session() as session:
+            stmt = await session.execute((
+                select(User_info)
+                .where(User_info.tg_id == tg_id)
+            ))
+            result = stmt.scalar_one_or_none()
 
             return result # Возвращаем список с информацией о пользователе из User_info

@@ -11,7 +11,7 @@ import Database.requests.core as rq_core
 # import app.keyboards.keyboards as kb
 import app.keyboards.inline_keyboards.main_menu_keyboard as inl_kb
 
-from app.panels.admin_panel import main_menu_admin
+from app.panels.admin_panel.admin_menu import main_menu_admin
 
 
 user_router = Router()
