@@ -215,6 +215,22 @@ class AsyncCore():
             await session.commit()
 
 
+    # Обновляем значение пола пользователя через Админ-панель
+    @staticmethod
+    async def update_gender_by_admin(tg_id: int, value):
+        async with async_session() as session:
+            user = select(User_info.id).where(User_info.tg_id == tg_id)
+
+            gender = GenderPeople.man if value == "male" else GenderPeople.woman
+            
+            await session.execute((
+                update(User_data)
+                .where(User_data.id_us_info==user)
+                .values(gender=gender)
+            ))
+            await session.commit()
+
+
     # Функция, проверяющая, есть ли пользователь с таким айди
     @staticmethod
     async def is_tg_id_real(tg_id: int) -> bool:

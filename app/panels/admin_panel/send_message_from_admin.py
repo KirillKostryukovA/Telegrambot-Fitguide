@@ -103,7 +103,62 @@ async def continue2_send_message_spec_user(message: Message, state: FSMContext):
 """              ОТПРАВКА СООБЩЕНИЯ              """
 
 
-@send_message_admin_router.message(Send_message.what)
+@send_message_admin_router.message(Send_message.what or F.data == "send_message_to_uniq_user")
+async def finish_send_message(message: Message, state: FSMContext):
+    try:  
+        rq = await rq_orm.AsyncOrm.information_about_user_info()
+        tg_id_users = [int(items.tg_id) for items in rq] # tg_id пользователей
+    
+        await state.update_data(what=message.text)
+        message_dict = await state.get_data()
+
+        # Отправка сообщений в зависимости от callback'а
+        if message_dict['who'] == "common_user":
+            for id_users in tg_id_users:
+                await bot.send_message(
+                    chat_id=id_users,
+                    text=message_dict['what']
+                )
+        elif message_dict['who'] == "to_close_chanel":
+            await bot.send_message(
+                chat_id=tgk_id,
+                text=message_dict['what'])
+        elif message_dict['who'] == "trainer_user":
+            await bot.send_message(
+                chat_id=trainer,
+                text=(
+f"""
+📨 СООБЩЕНИЕ ОТ АДМИНА\n
+{message_dict['what']}
+"""))
+        elif message_dict['who'] == "special_user":
+            await bot.send_message(
+                chat_id=int(message_dict['id_user_from_tg']),
+                text=(
+f"""
+📨 СООБЩЕНИЕ ОТ АДМИНА\n
+{message_dict['what']}
+"""))
+
+            
+        await message.answer("Ваше сообщение было успешно отправлено в чат!")
+        return await main_menu_admin(message)
+    
+    except Exception as e:
+        print(f"Произошла неопознанная ошибка в admin_panel: {e}")
+    except TelegramNetworkError as e:
+        print(f"Произошла ошибка TelegramNetworkError в admin_panel: {e}")
+    except TelegramAPIError as e:
+        print(f"Произошла ошибка TelegramAPIError в admin_panel: {e}")
+    except  TelegramBadRequest as e:
+        print(f"Произошла ошибка TelegramBadRequest в admin_panel: {e}")
+    finally:
+        await state.clear()
+
+
+# Если админ отправляет с профиля письмо 
+
+@send_message_admin_router.message(Send_message.what or F.data == "send_message_to_uniq_user")
 async def finish_send_message(message: Message, state: FSMContext):
     try:  
         rq = await rq_orm.AsyncOrm.information_about_user_info()

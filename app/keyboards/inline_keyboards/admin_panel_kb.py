@@ -1,5 +1,9 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 
+from Database.mapping.people_to_db_map import search_user_map
+
+from Database.mapping.people_to_db_map import *
 
 main_menu_kb =InlineKeyboardMarkup(inline_keyboard=[
     [InlineKeyboardButton(
@@ -31,7 +35,7 @@ whom_to_send_kb = InlineKeyboardMarkup(inline_keyboard=[
         callback_data="to_close_chanel",
     )],
     [InlineKeyboardButton(
-        text="Вернуться в главное менбю",
+        text="🏠 Вернуться в главное меню",
         callback_data="back_main_menu_admin"
     )],
 ])
@@ -39,7 +43,57 @@ whom_to_send_kb = InlineKeyboardMarkup(inline_keyboard=[
 
 back_main_menu_kb = InlineKeyboardMarkup(inline_keyboard=[
     [InlineKeyboardButton(
-        text="Вернуться в главное менбю",
+        text="🏠 Вернуться в главное меню",
         callback_data="back_main_menu_admin"
     )]
+])
+
+
+async def search_user_menu_kb():
+    keyboard = InlineKeyboardBuilder()
+    for items, values in search_user_map.items():
+        keyboard.add(InlineKeyboardButton(text=values, callback_data=items))
+    return keyboard.adjust(2, 1).as_markup()
+
+
+async def update_data_user_by_admin():
+    keyboard = InlineKeyboardBuilder()
+    for items, values in update_data_user_by_admin_map.items():
+        keyboard.add(InlineKeyboardButton(text=values, callback_data=items))
+    return keyboard.adjust(2).as_markup()
+
+
+gender_change = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton(
+        text="Мужской ♂️",
+        callback_data="new_gender:male",
+    )],
+    [InlineKeyboardButton(
+        text="Женский ♀️",
+        callback_data="new_gender:womale",
+    )],
+])
+
+
+subscribe_change = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton(
+        text="Удалить подписку",
+        callback_data="new_sub:delete_subscribe"
+    )],
+    [InlineKeyboardButton(
+        text="1 месяц",
+        callback_data="new_sub:add_1_month"
+    )],
+    [InlineKeyboardButton(
+        text="3 месяц",
+        callback_data="new_sub:add_3_month"
+    )],
+    [InlineKeyboardButton(
+        text="6 месяц",
+        callback_data="new_sub:add_6_month"
+    )],
+    [InlineKeyboardButton(
+        text="1 год",
+        callback_data="new_sub:add_1_year"
+    )],
 ])
