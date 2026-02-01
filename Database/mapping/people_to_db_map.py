@@ -30,3 +30,10 @@ update_data_user_by_admin_map = {
     "change_subscribe": "Подписка",
     "back_main_menu_admin": "🏠 Вернуться в главное меню",
 }
+
+subscription_time_gift_map = {
+    "sub_1_month" : "на 3 месяц",
+    "sub_3_month" : "на 6 месяцев",
+    "sub_6_month" : "на 6 месяцев",
+    "sub_1_year" : "на 1 год",
+}

@@ -5,6 +5,7 @@ from Database.mapping.people_to_db_map import search_user_map
 
 from Database.mapping.people_to_db_map import *
 
+
 main_menu_kb =InlineKeyboardMarkup(inline_keyboard=[
     [InlineKeyboardButton(
         text="Найти пользователя по тг-айди",
@@ -81,19 +82,19 @@ subscribe_change = InlineKeyboardMarkup(inline_keyboard=[
         callback_data="new_sub:delete_subscribe"
     )],
     [InlineKeyboardButton(
-        text="1 месяц",
-        callback_data="new_sub:add_1_month"
+        text="Продлить на 1 месяц",
+        callback_data="new_sub:sub_1_month"
     )],
     [InlineKeyboardButton(
-        text="3 месяц",
-        callback_data="new_sub:add_3_month"
+        text="Продлить на 3 месяца",
+        callback_data="new_sub:sub_3_month"
     )],
     [InlineKeyboardButton(
-        text="6 месяц",
-        callback_data="new_sub:add_6_month"
+        text="Продлить на 6 месяцев",
+        callback_data="new_sub:sub_6_month"
     )],
     [InlineKeyboardButton(
-        text="1 год",
-        callback_data="new_sub:add_1_year"
+        text="Продлить на 1 год",
+        callback_data="new_sub:sub_1_year"
     )],
 ])

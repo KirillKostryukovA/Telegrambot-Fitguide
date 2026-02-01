@@ -238,3 +238,22 @@ class AsyncCore():
             sqrt = await session.scalar(select(User_info).where(cast(User_info.tg_id, String) == tg_id))
 
             return False if sqrt is None else True
+        
+
+    # Удаляем подписку у пользователя
+    @staticmethod
+    async def delete_subs_user(tg_id: int):
+        async with async_session() as session:
+            await session.execute((
+                update(User_info)
+                .where(User_info.tg_id == tg_id)
+                .values(paid_subcreption=False)
+            ))
+
+            await session.execute((
+                update(User_info)
+                .where(User_info.tg_id == tg_id)
+                .values(subscription_duration=None)
+            ))
+            
+            await session.commit()
