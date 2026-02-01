@@ -16,7 +16,6 @@ from config import bot
 
 search_user_router = Router()
 
-USER_TG_ID = None # Эта переменная будет хранить tg_id пользователя, с которым админ взаимодействует
 
 class Search_user(StatesGroup):
     tg_id_user = State()
@@ -25,6 +24,10 @@ class Search_user(StatesGroup):
 class EditProfileByAdmin(StatesGroup):
     field = State()
     value = State()
+
+
+class Send_message_to_uniq_user(StatesGroup):
+    message = State()
 
 
 """                  Поиск пользователя                  """
@@ -57,9 +60,7 @@ async def user_modif(message: Message, state: FSMContext):
     user_info_dict = await rq_orm.AsyncOrm.information_about_user_info_one(tg_id=tg_id_user)
     user_data_dict = await rq_orm.AsyncOrm.information_about_user(tg_id=tg_id_user)
 
-    global USER_TG_ID
-    USER_TG_ID = user_info_dict.tg_id
-
+    await state.update_data(target_id_user=tg_id_user)
     try:
         if user_info_dict.paid_subcreption == True:
             # Преобразуем значения с типом данных datetime в str
@@ -113,8 +114,6 @@ async def user_modif(message: Message, state: FSMContext):
 
     except Exception as e:
         print(f"Произошла неопознанная ошибка в search_user.py: {e}")
-    finally:
-        await state.clear()
 
 
 """                  Редактируем профиль пользователя                  """
@@ -123,8 +122,6 @@ async def user_modif(message: Message, state: FSMContext):
 @search_user_router.callback_query(F.data=="change_data_user_by_admin")
 async def change_data_user_by_admin1(callback: CallbackQuery, state: FSMContext):
     await callback.answer()
-
-    await state.update_data(target_id_user=USER_TG_ID)
     
     await state.set_state(EditProfileByAdmin.field)
     await callback.message.edit_text("Что вы хотите изменить?", reply_markup=await inl_kb.update_data_user_by_admin())
@@ -152,21 +149,20 @@ async def new_gender_user(callback: CallbackQuery, state: FSMContext):
 
     try:
         value = callback.data.split(":")[1]
+        dict_data = await state.get_data()
 
-        dict_to_send = await state.get_data()
-
-        await rq_core.AsyncCore.update_gender_by_admin(tg_id=int(dict_to_send['target_id_user']), value=value)
+        await rq_core.AsyncCore.update_gender_by_admin(tg_id=int(dict_data['target_id_user']), value=value)
         
         if value == "male":
-            await callback.message.edit_text(f"Значение пола пользователя с айди {dict_to_send['target_id_user']} было успешно заменено: мужской")
+            await callback.message.edit_text(f"Значение пола пользователя с айди {dict_data['target_id_user']} было успешно заменено: мужской", reply_markup=inl_kb.back_main_menu_kb)
         else:
-            await callback.message.edit_text(f"Значение пола пользователя с айди {dict_to_send['target_id_user']} было успешно заменено: женский")
+            await callback.message.edit_text(f"Значение пола пользователя с айди {dict_data['target_id_user']} было успешно заменено: женский", reply_markup=inl_kb.back_main_menu_kb)
 
     except Exception as e:
         print(f"Произошла неопознанная ошибка в search_user в функции new_gender_user: {e}")
     finally:
         await state.clear()
-
+        
 
 # Изменяем подписку пользователя
 @search_user_router.callback_query(EditProfileByAdmin.value, F.data.startswith("new_sub:"))
@@ -181,7 +177,7 @@ async def new_subscribe_user(callback: CallbackQuery, state: FSMContext):
     try:
         if subs_value == "delete_subscribe":
             await rq_core.AsyncCore.delete_subs_user(tg_id=int(data_dict['target_id_user']))
-            await callback.message.answer(f"Подписка у пользователя с айди {data_dict['target_id_user']} была успешно удалена!", reply_markup=inl_kb.back_main_menu_kb)
+            await callback.message.edit_text(f"Подписка у пользователя с айди {data_dict['target_id_user']} была успешно удалена!", reply_markup=inl_kb.back_main_menu_kb)
         else:
             await rq_orm.AsyncOrm.update_user_paym_sub(tg_id=int(data_dict['target_id_user']), payload=subs_value)
             await callback.message.edit_text(f"Подписка у пользователя с айди {data_dict['target_id_user']} успешно продлена {subs_value_people_read}!", reply_markup=inl_kb.back_main_menu_kb)
@@ -202,5 +198,36 @@ async def new_subscribe_user(callback: CallbackQuery, state: FSMContext):
             
     except Exception as e:
         print(f"Произошла ошибка в search_user.py в new_subscribe_user: {e}")
+    finally:
+        await state.clear()
+
+
+"""                  Отправка сообщений пользователю                  """
+
+
+@search_user_router.callback_query(F.data == "send_message_to_uniq_user")
+async def send_message_from_adm(callback: CallbackQuery, state: FSMContext):
+    await callback.answer()
+
+    await state.set_state(Send_message_to_uniq_user.message)
+    await callback.message.edit_text("Отлично, теперь напишите сообщение для пользователя:", reply_markup=inl_kb.back_main_menu_kb)
+
+
+@search_user_router.message(Send_message_to_uniq_user.message)
+async def send_message_from_adm2(message: Message, state: FSMContext):
+    try:
+        await state.update_data(message=message.text)
+        data_dict = await state.get_data()
+
+        await message.answer(f"Ваше сообщение было успешно доставлено пользователю с tg_id: {data_dict['target_id_user']}")
+        await bot.send_message(
+            chat_id=data_dict['target_id_user'],
+            text=f"""
+    📨 СООБЩЕНИЕ ОТ АДМИНА\n
+    {data_dict['message']}
+    """)
+        
+    except Exception as e:
+        print(f"Произошла ошибка в search_user.py в send_message_from_adm2: {e}")
     finally:
         await state.clear()

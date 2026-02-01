@@ -1,6 +1,3 @@
-from Database.models import ActivityPeople, GenderPeople
-
-
 """ МАППИНГ С ЧЕЛОВЕКОЧИТАЕМЫХ ДАННЫХ НА БАЗУ ДАННЫХ """
 
 activity_map = {
