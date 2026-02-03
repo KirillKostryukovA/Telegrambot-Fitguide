@@ -89,6 +89,7 @@ class AsyncCore():
                 user_info = (
                     select(User_info.id)
                     .where(User_info.tg_id==tg_id)
+                    .scalar_subquery()
                 )
                 
                 await session.execute((
@@ -111,6 +112,7 @@ class AsyncCore():
                 user_info = (
                     select(User_info.id)
                     .where(User_info.tg_id==tg_id)
+                    .scalar_subquery()
                 )
                 
                 await session.execute((
@@ -133,6 +135,7 @@ class AsyncCore():
                 user_info = (
                     select(User_info.id)
                     .where(User_info.tg_id==tg_id)
+                    .scalar_subquery()
                 )
                 
                 await session.execute((
@@ -151,7 +154,7 @@ class AsyncCore():
     async def update_activity_in_profile(tg_id: int, data: str):
         async with async_session() as session:
             try:   
-                user_info = select(User_info.id).where(User_info.tg_id==tg_id)
+                user_info = select(User_info.id).where(User_info.tg_id==tg_id).scalar_subquery()
 
                 await session.execute((
                     update(User_data)
@@ -170,7 +173,7 @@ class AsyncCore():
     async def update_sleep_time_in_profile(tg_id: int, data: str):
         async with async_session() as session:
             try:
-                user_info = select(User_info.id).where(User_info.tg_id == tg_id)
+                user_info = select(User_info.id).where(User_info.tg_id == tg_id).scalar_subquery()
 
                 await session.execute((
                     update(User_data)
@@ -189,7 +192,7 @@ class AsyncCore():
     async def update_additional_information_in_profile(tg_id: int, data: str):
         async with async_session() as session:
             try:
-                user_info = select(User_info.id).where(User_info.tg_id == tg_id)
+                user_info = select(User_info.id).where(User_info.tg_id == tg_id).scalar_subquery()
 
                 await session.execute((
                     update(User_data)

@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 
 from aiogram import F, Router
 from aiogram.types import CallbackQuery, Message
-from aiogram.exceptions import TelegramAPIError, TelegramBadRequest, TelegramNetworkError
+from aiogram.exceptions import TelegramAPIError, TelegramBadRequest, TelegramNetworkError, TelegramForbiddenError
 
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
@@ -115,10 +115,14 @@ async def finish_send_message(message: Message, state: FSMContext):
         # Отправка сообщений в зависимости от callback'а
         if message_dict['who'] == "common_user":
             for id_users in tg_id_users:
-                await bot.send_message(
-                    chat_id=id_users,
-                    text=message_dict['what']
-                )
+                try:
+                    await bot.send_message(
+                        chat_id=id_users,
+                        text=message_dict['what']
+                    )
+                except Exception as e:
+                    print(f"Произошла неопознанная ошибка в admin_panel: {e}")
+                    continue
         elif message_dict['who'] == "to_close_chanel":
             await bot.send_message(
                 chat_id=tgk_id,
@@ -144,14 +148,16 @@ f"""
         await message.answer("Ваше сообщение было успешно отправлено в чат!")
         return await main_menu_admin(message)
     
-    except Exception as e:
-        print(f"Произошла неопознанная ошибка в admin_panel: {e}")
+    except TelegramForbiddenError as e:
+        print(f"Произошла ошибка в admin_panel, пользователь заблокировал бота: {e}")
     except TelegramNetworkError as e:
         print(f"Произошла ошибка TelegramNetworkError в admin_panel: {e}")
     except TelegramAPIError as e:
         print(f"Произошла ошибка TelegramAPIError в admin_panel: {e}")
     except  TelegramBadRequest as e:
         print(f"Произошла ошибка TelegramBadRequest в admin_panel: {e}")
+    except Exception as e:
+        print(f"Произошла неопознанная ошибка в admin_panel: {e}")
     finally:
         await state.clear()
 

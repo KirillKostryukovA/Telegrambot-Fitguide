@@ -1,3 +1,7 @@
+import os
+from datetime import *
+from dotenv import load_dotenv
+
 from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery
 
@@ -16,6 +20,13 @@ from config import bot
 
 search_user_router = Router()
 
+
+load_dotenv()
+URL_CLOSE_TGK = os.getenv("CLOSE_TGK")
+
+
+now = datetime.now(timezone.utc)
+DESTROYER_URL = timedelta(minutes=5)
 
 class Search_user(StatesGroup):
     tg_id_user = State()
@@ -229,5 +240,32 @@ async def send_message_from_adm2(message: Message, state: FSMContext):
         
     except Exception as e:
         print(f"Произошла ошибка в search_user.py в send_message_from_adm2: {e}")
+    finally:
+        await state.clear()
+
+
+@search_user_router.callback_query(F.data == "give_url_to_close_tgk")
+async def give_url_to_close_tgk(callback: CallbackQuery, state: FSMContext):
+    await callback.answer()
+
+    data_dict = await state.get_data()
+
+    try:
+        invite = await bot.create_chat_invite_link(
+            chat_id=URL_CLOSE_TGK,
+            member_limit=1,
+            expire_date=now + DESTROYER_URL
+        )
+
+        await callback.message.answer("Ссылка на закрытый ТГК была успешна отправлена пользователю!")
+        
+        await bot.send_message(
+            chat_id=data_dict['target_id_user'],
+            text=f"""
+🔒 Ваша персональная ссылка:\n{invite.invite_link}\n
+⚠️ Ссылка одноразовая и действует 5 минут"
+""") 
+    except Exception as e:
+        print(f"Произошла неопознаянная ошибка в search_user.py в give_url_to_close_tgk: {e}")
     finally:
         await state.clear()

@@ -5,7 +5,7 @@ from sqlalchemy.orm import DeclarativeBase
 from config import settings_db
 
 
-async_engine = create_async_engine(url=settings_db.async_db_URL, echo=True)
+async_engine = create_async_engine(url=settings_db.async_db_URL, echo=False)
 async_session = async_sessionmaker(async_engine)
 
 # Основной класс для создания моделей таблиц БД

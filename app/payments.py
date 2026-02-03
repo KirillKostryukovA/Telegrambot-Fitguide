@@ -22,6 +22,9 @@ load_dotenv()
 PROVIDER_TOKEN = os.getenv("PROVIDER_TOKEN")
 CLOSE_TGK = os.getenv("CLOSE_TGK")
 
+now = datetime.now(timezone.utc)
+DESTROYER_URL = timedelta(minutes=5)
+
 
 """     ----- Платная подписка для пользователя -----     """
 
@@ -213,6 +216,7 @@ async def successful_payment(message: Message):
     invite = await bot.create_chat_invite_link(
         chat_id=CLOSE_TGK,
         member_limit=1, # Только для входа на 1 раз
+        expire_date=now + DESTROYER_URL
     )
 
     await message.answer(f"""

@@ -1,5 +1,4 @@
 import asyncio
-import logging
 import tracemalloc
 
 from config import dp, bot
@@ -47,5 +46,4 @@ async def main():
 
 # Запуск нашего проекта
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
     asyncio.run(main())

@@ -18,6 +18,7 @@ sleep_time_map = {
 search_user_map = {
     "send_message_to_uniq_user": "💬 Написать сообщение",
     "change_data_user_by_admin": "✏️ Изменить данные",
+    "give_url_to_close_tgk": "🔐 ССЫЛКА НА ЗАКРЫТЫЙ КАНАЛ",
     "back_main_menu_admin": "🏠 Вернуться в главное меню",
 }
 
