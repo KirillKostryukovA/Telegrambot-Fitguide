@@ -19,3 +19,11 @@ async def main_menu_kb():
     for items, values in main_menu_map.items():
         keyboard.add(InlineKeyboardButton(text=values, callback_data=f"{items}"))
     return keyboard.adjust(2).as_markup()
+
+
+back_main_menu = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton(
+        text="Вернуться в главное меню",
+        callback_data="back_main_menu",
+    )]
+])

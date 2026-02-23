@@ -8,6 +8,10 @@ paid_subscription_kb = InlineKeyboardMarkup(inline_keyboard=[
         text="Приобрести подписку прямо сейчас 💎",
         callback_data="buy_subscribe_now",
     )],
+    [InlineKeyboardButton(
+        text="🏠 Вернуться в главное меню",
+        callback_data="back_main_menu",
+    )],
 ])
 
 

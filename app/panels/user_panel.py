@@ -2,11 +2,10 @@ import os
 from dotenv import load_dotenv
 
 from aiogram import Router, F
-from aiogram.types import Message, CallbackQuery
+from aiogram.types import Message, CallbackQuery, InputMediaPhoto
 from aiogram.filters.command import CommandStart
 
 import Database.requests.orm as rq_orm
-import Database.requests.core as rq_core
 
 # import app.keyboards.keyboards as kb
 import app.keyboards.inline_keyboards.main_menu_keyboard as inl_kb
@@ -27,8 +26,8 @@ async def main_menu(message: Message):
     if message.from_user.id == admins:
         return await main_menu_admin(message)
     
-    await rq_orm.AsyncOrm.get_user_tg_id(message.from_user.id) # Функция, чтобы получить tg_id пользователя
-    await message.answer(f"""
+    photo_url = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTFx0gyiLDo9h9d22mf0rThfr9RuJ5ciGrj3Q&s'
+    wellcome_text = f"""
 🏋️‍♂️ Привет, {message.from_user.first_name}!
 
 Я — твой личный тренер и наставник по питанию прямо здесь, в Telegram! Моя цель — помочь тебе кардинально преобразить свою форму, силу и выносливость.
@@ -43,16 +42,26 @@ async def main_menu(message: Message):
 • ❓ Помощь / FAQ — как пользоваться ботом.
 
 🎯 Главное — начать. Первый шаг уже сделан!
-""", reply_markup=await inl_kb.main_menu_kb(), request_timeout=30)
+"""
     
+    await rq_orm.AsyncOrm.get_user_tg_id(message.from_user.id) # Функция, чтобы получить tg_id пользователя
+
+    # Присылаем фото с подписью
+    await message.answer_photo(
+        photo=photo_url
+    )
+    await message.answer(
+        text=wellcome_text,
+        reply_markup=await inl_kb.main_menu_kb()
+    )
+
 
 # Главное меню (вызов через Start)
 @user_router.callback_query(F.data == "back_main_menu")
 async def main_menu(callback: CallbackQuery):
     await callback.answer()
-    
-    await rq_orm.AsyncOrm.get_user_tg_id(callback.from_user.id) # Функция, чтобы получить tg_id пользователя
-    await callback.message.edit_text(f"""
+
+    wellcome_text = f"""
 🏋️‍♂️ Привет, {callback.from_user.first_name}!
 
 Я — твой личный тренер и наставник по питанию прямо здесь, в Telegram! Моя цель — помочь тебе кардинально преобразить свою форму, силу и выносливость.
@@ -67,4 +76,11 @@ async def main_menu(callback: CallbackQuery):
 • ❓ Помощь / FAQ — как пользоваться ботом.
 
 🎯 Главное — начать. Первый шаг уже сделан!
-""", reply_markup=await inl_kb.main_menu_kb())
+"""
+    
+    await rq_orm.AsyncOrm.get_user_tg_id(callback.from_user.id) # Функция, чтобы получить tg_id пользователя
+    
+    await callback.message.edit_text(
+            text=wellcome_text,
+            reply_markup=await inl_kb.main_menu_kb()
+        )

@@ -1,5 +1,4 @@
 import os
-import asyncio
 
 from dotenv import load_dotenv
 
@@ -11,6 +10,7 @@ from app.payments import paid_subscription
 from app.panels.user_panel import main_menu
 
 import Database.requests.orm as rq_orm
+import app.keyboards.inline_keyboards.main_menu_keyboard as inl_kb
 
 from config import bot
 
@@ -53,7 +53,7 @@ async def personal_meal_plan(callback: CallbackQuery):
     Перейти в закрытый ТГ-канал
 
     Оставайтесь на связи! Если у вас срочный вопрос, вы всегда можете написать нам.
-    """)
+    """, reply_markup=inl_kb.back_main_menu)
 
         await message_to_trainer_2(callback)
 

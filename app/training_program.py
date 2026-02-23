@@ -9,6 +9,7 @@ from app.payments import paid_subscription
 from app.panels.user_panel import main_menu
 
 import app.keyboards.inline_keyboards.training_program_keyboard as inl_kb
+import app.keyboards.inline_keyboards.main_menu_keyboard as main_kb
 
 import Database.requests.orm as rq_orm
 
@@ -46,7 +47,7 @@ async def post_free_program(callback: CallbackQuery):
 А если захочешь программу, которая будет учитывать твои цели, твой уровень, твой график и здоровье — просто напиши мне, и мы сделаем её персональной под тебя.
 
 Удачи на тренировках! 
-""")
+""", reply_markup=main_kb.back_main_menu)
 
     try:
         load_dotenv()
@@ -95,7 +96,7 @@ async def get_paid_training_program(callback: CallbackQuery):
     Перейти в закрытый ТГ-канал
 
     Оставайтесь на связи! Если у вас срочный вопрос, вы всегда можете написать нам.
-    """)
+    """, reply_markup=main_kb.back_main_menu)
         
         await send_message_trainer(callback)
     

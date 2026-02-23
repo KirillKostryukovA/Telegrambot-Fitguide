@@ -10,6 +10,7 @@ from aiogram.fsm.context import FSMContext
 
 from config import bot
 
+import app.keyboards.inline_keyboards.main_menu_keyboard as main_kb
 
 support_router = Router()
 
@@ -39,7 +40,7 @@ async def message_user_to_support(callback: CallbackQuery, state: FSMContext):
     Скриншот или код ошибки (если есть).
 
 Мы свяжемся с вами в этом чате в ближайшее время. ⏱
-""")
+""", reply_markup=main_kb.back_main_menu)
     
     await state.set_state(Technical_support.send_message)
 
